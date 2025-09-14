@@ -1,0 +1,22 @@
+/* Remove margens e garante que a página ocupe toda a tela */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background-color: black; /* Define o fundo preto */
+    overflow: hidden; /* Evita barras de rolagem desnecessárias */
+}
+
+/* Usa Flexbox para centralizar a imagem */
+body {
+    display: flex;
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center;    /* Centraliza verticalmente */
+}
+
+/* Garante que a imagem não seja esticada ou reduzida */
+img {
+    max-width: 100%;
+    max-height: 100%;
+    /* Não definimos width ou height, então ela manterá o tamanho original */
+}

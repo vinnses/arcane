@@ -8,9 +8,13 @@ services:
     volumes:
       - ${ARCANE_DIR}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
       - ${ARCANE_DIR}/nginx/logs:/var/log/nginx
+      - ${ARCANE_DIR}/nginx/www:/var/www
+      - ${ARCANE_DIR}/nginx/snippets:/etc/nginx/snippets
     networks:
       - lilith_default
     restart: unless-stopped
+    stdin_open: true
+    tty: true  
 
 networks:
   lilith_default:

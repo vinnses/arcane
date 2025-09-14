@@ -1,0 +1,27 @@
+services:
+  btop:
+    build: .
+    container_name: btop
+    restart: unless-stopped
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "8686:8686"
+    networks:
+       - lilith_default
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

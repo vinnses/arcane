@@ -1,0 +1,3 @@
+.arcane_data/*
+!.arcane_data/
+!.arcane_data/.gitkeep

@@ -1,0 +1,28 @@
+services:
+  culab:
+    build: .
+    container_name: culab
+    restart: unless-stopped
+    volumes:
+      - ${PROJECT_DIR}/workspace:/workspace
+    ports:
+      - "8080:8080"
+    networks:
+      lilith_default
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

@@ -1,16 +1,24 @@
 services:
   culab:
-    build: .
+    build: 
+      context: .
+      args:
+        - USER=${USER}
+        - UID=${UID}
+        - GID=${GID}
     container_name: culab
     restart: unless-stopped
-    volumes:
-      - ${PROJECT_DIR}/workspace:/workspace
-    ports:
-      - "8080:8080"
-    networks:
-      lilith_default
     env_file:
       - .env
+    volumes:
+      #- ./workspace:/workspace
+      - ${ARCANE_DIR}/culab/workspace:/workspace
+      - /home/${USER}/.gitconfig:/home/${USER}/.gitconfig:ro
+      - /home/${USER}/.ssh:/home/${USER}/.ssh:ro
+    ports:
+      - "8888:8888"
+    networks:
+      - lilith_default
     stdin_open: true
     tty: true
     deploy:

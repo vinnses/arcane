@@ -1,0 +1,20 @@
+services:
+  jupyter:
+    build:
+      context: .
+    ports:
+      - 8888:8888
+    volumes:
+      - jupyter-data:/home/jovyan/work
+    command: start-notebook.py --NotebookApp.token='my-token'
+    networks:
+      - asmodeus_default
+
+volumes:
+  jupyter-data:
+    name: jupyter-data
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

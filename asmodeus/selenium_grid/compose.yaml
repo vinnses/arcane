@@ -1,0 +1,65 @@
+services:
+  selenium-hub:
+    image: selenium/hub:4.15.0
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"  # Event bus publish port
+      - "4443:4443"  # Event bus subscribe port  
+      - "4444:4444"  # Hub port
+    environment:
+      - SE_SESSIONS_MAP_HOST=selenium-hub
+      - SE_SESSIONS_MAP_PORT=4444
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - asmodeus_default
+
+  chrome:
+    image: selenium/node-chrome:4.15.0
+    shm_size: 2gb
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_SESSION_MAP_HOST=selenium-hub
+      - SE_SESSION_MAP_PORT=4444
+    deploy:
+      replicas: ${CHROME_SCALE:-2}
+    networks:
+      - asmodeus_default
+    ports:
+      - "5900" # VNC
+      - "7900" # Navegador
+
+  firefox:
+    image: selenium/node-firefox:4.15.0
+    shm_size: 2gb
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_SESSION_MAP_HOST=selenium-hub
+      - SE_SESSION_MAP_PORT=4444
+    deploy:
+      replicas: ${FIREFOX_SCALE:-2}
+    networks:
+      - asmodeus_default
+    ports:
+      - "5900" # VNC
+      - "7900" # Navegador
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true
+

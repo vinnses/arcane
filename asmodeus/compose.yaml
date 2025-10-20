@@ -1,0 +1,16 @@
+services:
+  arcane:
+    image: ghcr.io/ofkm/arcane:latest
+    container_name: arcane
+    ports:
+      - '3552:3552'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - data:/app/data
+      - ${ARCANE_DIR}:/app/data/projects
+    restart: unless-stopped
+    env_file:
+      - .env
+
+volumes:
+  data:

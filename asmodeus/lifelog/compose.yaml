@@ -1,0 +1,27 @@
+services:
+  lifelog-python:
+    build:
+      context: .
+      args:
+        - USER=${USER}
+        - UID=${UID}
+        - GID=${GID}
+        - PROJECT_ROOT=${PROJECT_ROOT}
+    container_name: lifelog-python
+    volumes:
+      - ${PROJECT_DIR}:${PROJECT_ROOT}
+    networks:
+      - asmodeus_default
+    ports:
+      - "8880:8880"
+    tty: true
+    stdin_open: true
+    env_file:
+      - .env
+    # command: dagster dev -h 0.0.0.0 -p 3000 -m lifelog.pipelines.definitions
+
+networks:
+  asmodeus_default:
+  
+    name: asmodeus_default
+    external: true

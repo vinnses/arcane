@@ -1,0 +1,17 @@
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: jellyfin
+    networks: 
+      - lilith_default
+    ports:
+      - '8096:8096'
+    volumes:
+      - ${CONFIG_DIR}:/config
+      - ${DATA_DIR}:/media
+    restart: unless-stopped
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

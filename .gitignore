@@ -1,3 +1,6 @@
+arcane_data
 *.env
 *.log
 *.swp
+*.bkp
+*.tar*

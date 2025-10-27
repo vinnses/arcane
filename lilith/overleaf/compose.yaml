@@ -1,0 +1,79 @@
+services:
+  mongo:
+    image: ${MONGO_IMAGE}:${MONGO_VERSION}
+    container_name: mongo
+    command:
+      - --replSet
+      - overleaf
+    expose:
+      - "27017"
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"]
+      timeout: 10s
+      interval: 10s
+      retries: 5
+    restart: always
+    volumes:
+      - type: bind
+        source: ${MONGO_DATA_PATH}
+        target: /data/db
+        bind:
+          create_host_path: true
+    networks:
+      - default
+
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: redis
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    expose:
+      - "6379"
+    restart: always
+    volumes:
+      - type: bind
+        source: ${REDIS_DATA_PATH}
+        target: /data
+        bind:
+          create_host_path: true
+    networks:
+      - default
+
+  sharelatex:
+    image: ${OVERLEAF_IMAGE_NAME:-sharelatex/sharelatex:5.5.5}
+    container_name: sharelatex
+    depends_on:
+      mongo:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_started
+        required: true
+    env_file:
+      - .env
+      - variables.env
+    links:
+      - redis
+      - mongo
+    networks:
+      - lilith
+      - default
+    restart: always
+    stop_grace_period: 1m0s
+    volumes:
+      - type: bind
+        source: ${OVERLEAF_DATA_PATH}
+        target: /var/lib/overleaf
+        bind:
+          create_host_path: true
+    ports:
+      - ${OVERLEAF_PORT}
+
+networks:
+  default:
+    name: overleaf_default
+  lilith:
+    name: lilith_default
+    external: true

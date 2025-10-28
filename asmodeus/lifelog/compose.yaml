@@ -22,6 +22,5 @@ services:
 
 networks:
   asmodeus_default:
-  
     name: asmodeus_default
     external: true

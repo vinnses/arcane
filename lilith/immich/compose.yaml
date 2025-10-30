@@ -31,7 +31,8 @@ services:
     healthcheck:
       disable: false
     networks:
-      - lilith_default
+      - default
+      - lilith
 
   immich-machine-learning:
     container_name: immich_machine_learning
@@ -42,14 +43,14 @@ services:
     #   file: hwaccel.ml.yml
     #   service: cpu # set to one of [armnn, cuda, rocm, openvino, openvino-wsl, rknn] for accelerated inference - use the `-wsl` version for WSL2 where applicable
     volumes:
-      - model-cache:/cache
+      - ${MODEL_DIR}:/cache
     env_file:
       - .env
     restart: always
     healthcheck:
       disable: false
     networks:
-      - lilith_default
+      - default
 
   redis:
     container_name: immich_redis
@@ -58,7 +59,7 @@ services:
       test: redis-cli ping || exit 1
     restart: always
     networks:
-      - lilith_default
+      - default
 
   database:
     container_name: immich_postgres
@@ -76,12 +77,12 @@ services:
     shm_size: 128mb
     restart: always
     networks:
-      - lilith_default
-
-volumes:
-  model-cache:
+      - default
 
 networks:
-  lilith_default:
+  default:
+    driver: bridge
+
+  lilith:
     name: lilith_default
     external: true

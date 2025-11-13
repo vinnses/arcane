@@ -1,0 +1,30 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    networks:
+      - lilith_default
+    ports:
+      - "11434:11434"
+    tty: true
+    stdin_open: true
+    volumes:
+      - ollama:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true 
+
+volumes:
+  ollama:
+
+

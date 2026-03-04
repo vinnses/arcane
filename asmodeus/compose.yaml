@@ -1,3 +1,6 @@
+include:
+  - dns/compose.yaml
+
 services:
   arcane:
     image: ghcr.io/ofkm/arcane:latest

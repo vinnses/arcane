@@ -1,0 +1,55 @@
+name: taildns
+
+services:
+  taildns:
+    image: tailscale/tailscale:latest
+    container_name: taildns
+    hostname: taildns
+    cap_add:
+      - net_admin
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      TS_AUTHKEY: ${TS_AUTHKEY}
+      TS_AUTH_ONCE: "true"
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+      TS_EXTRA_ARGS: --advertise-tags=tag:dns --accept-dns=false
+    volumes:
+      - ts-dns-state:/var/lib/tailscale
+      - dns-data:/data
+      - ./generate-hell.sh:/usr/local/bin/generate-hell.sh:ro
+    command: >
+      sh -c "
+        /usr/local/bin/containerboot &
+        until tailscale status > /dev/null 2>&1; do sleep 1; done;
+        generate-hell.sh;
+        wait
+      "
+    healthcheck:
+      test: ["CMD", "tailscale", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
+
+  dnsmasq:
+    image: alpine:3.20
+    container_name: dnsmasq
+    network_mode: "service:taildns"
+    depends_on:
+      taildns:
+        condition: service_healthy
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf:ro
+      - ./upstream.conf:/etc/dnsmasq.d/upstream.conf:ro
+      - dns-data:/etc/dnsmasq.d/hell/:ro
+      - /run/NetworkManager/resolv.conf:/upstream/nm-resolv.conf:ro
+    command: >
+      sh -c "apk add --no-cache dnsmasq && dnsmasq --keep-in-foreground"
+    restart: unless-stopped
+
+volumes:
+  ts-dns-state:
+  dns-data:

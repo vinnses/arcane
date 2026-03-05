@@ -1,0 +1,49 @@
+name: obsidian
+
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VAULT_PATH}:/var/syncthing/vault
+      - syncthing-config:/var/syncthing/config
+    networks:
+      - asmodeus_default
+
+  kopia:
+    image: kopia/kopia:latest
+    container_name: kopia
+    restart: unless-stopped
+    entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
+    env_file:
+      - .env
+    volumes:
+      - ${ARCANE}/obsidian/kopia-entrypoint.sh:/app/entrypoint.sh:ro
+      - ${VAULT_PATH}:/app/source:ro
+      - ${KOPIA_REPO_PATH}:/app/repository
+      - kopia-config:/app/config
+      - kopia-cache:/app/cache
+      - kopia-logs:/app/logs
+    environment:
+      - KOPIA_CACHE_DIRECTORY=/app/cache
+      - KOPIA_LOG_DIR=/app/logs
+    networks:
+      - asmodeus_default
+
+volumes:
+  syncthing-config:
+  kopia-config:
+  kopia-cache:
+  kopia-logs:
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

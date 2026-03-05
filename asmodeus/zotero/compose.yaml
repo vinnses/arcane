@@ -1,0 +1,22 @@
+name: zotero
+
+services:
+  zotero-webdav:
+    image: bytemark/webdav:latest
+    container_name: zotero-webdav
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - AUTH_TYPE=Basic
+      - USERNAME=${WEBDAV_USERNAME}
+      - PASSWORD=${WEBDAV_PASSWORD}
+    volumes:
+      - ${ZOTERO_DATA_PATH}:/var/lib/dav/data
+    networks:
+      - asmodeus_default
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

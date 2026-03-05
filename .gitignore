@@ -1,5 +1,7 @@
 arcane_data
 *.env
+.env.*
+!.env.example
 *.log
 *.swp
 *.bkp

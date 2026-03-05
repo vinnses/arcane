@@ -11,8 +11,7 @@ services:
     env_file:
       - .env
     volumes:
-      #- ./workspace:/workspace
-      - ${ARCANE_DIR}/culab/workspace:/workspace
+      - ${ARCANE}/culab/workspace:/workspace
       - /home/${USER}/.gitconfig:/home/${USER}/.gitconfig:ro
       - /home/${USER}/.ssh:/home/${USER}/.ssh:ro
     ports:

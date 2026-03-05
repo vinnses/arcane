@@ -1,0 +1,26 @@
+name: obsidian_sync
+
+services:
+  syncthing:
+    image: syncthing/syncthing:latest
+    container_name: syncthing
+    hostname: syncthing
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - ${VAULT_PATH}:/var/syncthing/vault
+      - syncthing-config:/var/syncthing/config
+    networks:
+      - asmodeus_default
+
+volumes:
+  syncthing-config:
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

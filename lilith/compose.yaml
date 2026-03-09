@@ -1,15 +1,13 @@
 services:
   arcane:
     image: ghcr.io/ofkm/arcane:latest
-    container_name: lilith-arcane
+    container_name: arcane
     ports:
       - '3552:3552'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${ARCANE}/arcane_data:/app/data
-      - ${ARCANE}:${ARCANE}
-    environment:
-      - PROJECTS_DIRECTORY=${ARCANE}
+      - ${ARCANE}/.arcane_data:/app/data
+      - ${ARCANE}:/app/data/projects
     restart: unless-stopped
     env_file:
       - .env

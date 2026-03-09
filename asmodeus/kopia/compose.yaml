@@ -1,7 +1,7 @@
 services:
   kopia:
     image: kopia/kopia:latest
-    container_name: asmodeus-kopia
+    container_name: kopia
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     env_file:
@@ -9,19 +9,14 @@ services:
     volumes:
       - ${ARCANE}/kopia/entrypoint.sh:/app/entrypoint.sh:ro
       - ${ARCANE}/kopia/sources.conf:/app/sources.conf:ro
-      - ${KOPIA_REPO_PATH}:/app/repository
-      - kopia-config:/app/config
-      - kopia-cache:/app/cache
-      - kopia-logs:/app/logs
+      - ${ARCANE}/kopia/.data/repo:/app/repository
+      - ${ARCANE}/kopia/.data/config:/app/config
+      - ${ARCANE}/kopia/.data/cache:/app/cache
+      - ${ARCANE}/kopia/.data/logs:/app/logs
       # === Sources (add new backup sources here) ===
       - ${VAULT_PATH}:/app/sources/obsidian:ro
     networks:
       - asmodeus_default
-
-volumes:
-  kopia-config:
-  kopia-cache:
-  kopia-logs:
 
 networks:
   asmodeus_default:

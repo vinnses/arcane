@@ -1,7 +1,7 @@
 services:
   nginx:
     image: nginx:alpine
-    container_name: asmodeus-nginx
+    container_name: nginx
     restart: unless-stopped
     env_file:
       - .env

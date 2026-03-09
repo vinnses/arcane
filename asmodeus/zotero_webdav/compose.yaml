@@ -1,9 +1,7 @@
-name: zotero
-
 services:
   zotero-webdav:
     image: bytemark/webdav:latest
-    container_name: zotero-webdav
+    container_name: asmodeus-zotero-webdav
     restart: unless-stopped
     env_file:
       - .env

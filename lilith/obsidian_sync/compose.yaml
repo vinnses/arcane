@@ -1,8 +1,8 @@
 services:
   syncthing:
     image: syncthing/syncthing:latest
-    container_name: asmodeus-obsidian-syncthing
-    hostname: asmodeus-obsidian-syncthing
+    container_name: lilith-obsidian-syncthing
+    hostname: lilith-obsidian-syncthing
     restart: unless-stopped
     env_file:
       - .env
@@ -13,12 +13,12 @@ services:
       - ${VAULT_PATH}:/var/syncthing/vault
       - syncthing-config:/var/syncthing/config
     networks:
-      - asmodeus_default
+      - lilith_default
 
 volumes:
   syncthing-config:
 
 networks:
-  asmodeus_default:
-    name: asmodeus_default
+  lilith_default:
+    name: lilith_default
     external: true

@@ -1,9 +1,7 @@
-name: nginx
-
 services:
   nginx:
     image: nginx:alpine
-    container_name: nginx
+    container_name: asmodeus-nginx
     restart: unless-stopped
     env_file:
       - .env
@@ -11,6 +9,8 @@ services:
       - "80:80"
     volumes:
       - ${ARCANE}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ${ARCANE}/nginx/logs:/var/log/nginx
+      - ${ARCANE}/nginx/snippets:/etc/nginx/snippets:ro
     networks:
       - asmodeus_default
 

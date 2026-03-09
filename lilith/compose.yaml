@@ -1,7 +1,7 @@
 services:
   arcane:
     image: ghcr.io/ofkm/arcane:latest
-    container_name: arcane
+    container_name: lilith-arcane
     ports:
       - '3552:3552'
     volumes:

@@ -1,9 +1,7 @@
-name: kopia
-
 services:
   kopia:
     image: kopia/kopia:latest
-    container_name: kopia
+    container_name: asmodeus-kopia
     restart: unless-stopped
     entrypoint: ["/bin/sh", "/app/entrypoint.sh"]
     env_file:

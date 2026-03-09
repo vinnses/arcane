@@ -1,15 +1,18 @@
 services:
-  ollama:
-    image: ollama/ollama:latest
-    container_name: lilith-ollama
+  btop:
+    build: .
+    container_name: lilith-btop
+    restart: unless-stopped
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "8686:8686"
     networks:
       - lilith_default
-    ports:
-      - "11434:11434"
-    tty: true
     stdin_open: true
-    volumes:
-      - ollama:/root/.ollama
+    tty: true
     deploy:
       resources:
         reservations:
@@ -17,14 +20,8 @@ services:
             - driver: nvidia
               count: all
               capabilities: [gpu]
-    restart: unless-stopped
 
 networks:
   lilith_default:
     name: lilith_default
-    external: true 
-
-volumes:
-  ollama:
-
-
+    external: true

@@ -1,8 +1,8 @@
 services:
   taildns:
     image: tailscale/tailscale:latest
-    container_name: asmodeus-taildns
-    hostname: asmodeus-taildns
+    container_name: lilith-taildns
+    hostname: lilith-taildns
     cap_add:
       - net_admin
     devices:
@@ -30,7 +30,7 @@ services:
 
   dnsmasq:
     image: alpine:3.20
-    container_name: asmodeus-dnsmasq
+    container_name: lilith-dnsmasq
     network_mode: "service:taildns"
     depends_on:
       taildns:

@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ${ARCANE}/zotero/data:/var/lib/dav/data
+      - ${ARCANE}/zotero/.data:/var/lib/dav/data
     networks:
       - asmodeus_default
 

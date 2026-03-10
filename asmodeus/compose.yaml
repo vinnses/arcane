@@ -6,7 +6,7 @@ services:
       - '3552:3552'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ${ARCANE}/.arcane_data:/app/data
+      - ${ARCANE}/.data:/app/data
       - ${ARCANE}:/app/data/projects
     restart: unless-stopped
     env_file:

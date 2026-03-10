@@ -1,7 +1,7 @@
 services:
   syncthing:
     image: syncthing/syncthing:latest
-    container_name: lilith-obsidian-syncthing
+    container_name: syncthing
     hostname: lilith-obsidian-syncthing
     restart: unless-stopped
     env_file:
@@ -11,12 +11,9 @@ services:
       - PGID=${PGID}
     volumes:
       - ${VAULT_PATH}:/var/syncthing/vault
-      - syncthing-config:/var/syncthing/config
+      - ${ARCANE}/obsidian/.data:/var/syncthing/config
     networks:
       - lilith_default
-
-volumes:
-  syncthing-config:
 
 networks:
   lilith_default:

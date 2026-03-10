@@ -1,7 +1,7 @@
 services:
   taildns:
     image: tailscale/tailscale:latest
-    container_name: lilith-taildns
+    container_name: taildns
     hostname: lilith-taildns
     cap_add:
       - net_admin
@@ -10,8 +10,8 @@ services:
     env_file:
       - .env
     volumes:
-      - taildns-state:/var/lib/tailscale
-      - dns-data:/data
+      - ${ARCANE}/taildns/.data/state:/var/lib/tailscale
+      - ${ARCANE}/taildns/.data/generated:/data
       - ${ARCANE}/taildns/generate-config.sh:/usr/local/bin/generate-config.sh:ro
     command: >
       sh -c "
@@ -30,19 +30,15 @@ services:
 
   dnsmasq:
     image: alpine:3.20
-    container_name: lilith-dnsmasq
+    container_name: dnsmasq
     network_mode: "service:taildns"
     depends_on:
       taildns:
         condition: service_healthy
     volumes:
       - ${ARCANE}/taildns/dnsmasq.conf:/etc/dnsmasq.conf:ro
-      - dns-data:/etc/dnsmasq.d/generated/:ro
+      - ${ARCANE}/taildns/.data/generated:/etc/dnsmasq.d/generated/:ro
       - /run/NetworkManager/resolv.conf:/upstream/nm-resolv.conf:ro
     command: >
       sh -c "apk add --no-cache dnsmasq && dnsmasq --keep-in-foreground"
     restart: unless-stopped
-
-volumes:
-  taildns-state:
-  dns-data:

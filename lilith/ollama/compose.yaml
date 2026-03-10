@@ -1,15 +1,17 @@
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: lilith-ollama
+    container_name: ollama
     networks:
       - lilith_default
     ports:
       - "11434:11434"
     tty: true
     stdin_open: true
+    env_file:
+      - .env
     volumes:
-      - ollama:/root/.ollama
+      - ${ARCANE}/ollama/.data:/root/.ollama
     deploy:
       resources:
         reservations:
@@ -22,9 +24,4 @@ services:
 networks:
   lilith_default:
     name: lilith_default
-    external: true 
-
-volumes:
-  ollama:
-
-
+    external: true

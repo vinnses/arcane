@@ -1,7 +1,7 @@
 services:
   btop:
     build: .
-    container_name: lilith-btop
+    container_name: btop
     restart: unless-stopped
     pid: "host"
     volumes:

@@ -15,6 +15,7 @@ services:
       - ${ARCANE}/kopia/.data/logs:/app/logs
       # === Sources (add new backup sources here) ===
       - ${VAULT_PATH}:/app/sources/obsidian:ro
+      - ${ARCANE}/webdav/.data/zotero:/app/sources/zotero:ro
     networks:
       - asmodeus_default
 

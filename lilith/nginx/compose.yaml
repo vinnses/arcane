@@ -2,19 +2,17 @@ services:
   nginx:
     image: nginx:alpine
     container_name: nginx
+    restart: unless-stopped
+    env_file:
+      - .env
     ports:
       - "80:80"
-      - "443:443"
     volumes:
-      - ${ARCANE}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ${ARCANE}/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ${ARCANE}/nginx/logs:/var/log/nginx
-      - ${ARCANE}/nginx/www:/var/www
-      - ${ARCANE}/nginx/snippets:/etc/nginx/snippets
+      - ${ARCANE}/nginx/snippets:/etc/nginx/snippets:ro
     networks:
       - lilith_default
-    restart: unless-stopped
-    stdin_open: true
-    tty: true
 
 networks:
   lilith_default:

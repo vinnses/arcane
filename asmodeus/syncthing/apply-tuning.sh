@@ -4,7 +4,7 @@
 # Usage:
 #   ./apply-tuning.sh [/path/to/config.xml]
 #
-# Defaults to ${ARCANE}/obsidian/.data/config.xml if no argument is given.
+# Defaults to ${ARCANE}/syncthing/.data/config.xml if no argument is given.
 #
 # What this script changes:
 #   In ALL <folder> blocks (including <defaults><folder>):
@@ -27,7 +27,7 @@
 
 set -eu
 
-CONFIG="${1:-${ARCANE:-}/obsidian/.data/config.xml}"
+CONFIG="${1:-${ARCANE:-}/syncthing/.data/config.xml}"
 
 # ---------------------------------------------------------------------------
 # Validation
@@ -126,5 +126,5 @@ echo "  [options] startBrowser → false"
 echo ""
 echo "Tuning complete. To apply changes, restart Syncthing:"
 echo ""
-echo "  docker compose -f obsidian/compose.yaml restart syncthing"
+echo "  docker compose -f syncthing/compose.yaml restart syncthing"
 echo ""

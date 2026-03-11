@@ -1,10 +1,19 @@
 services:
+  zotero-init:
+    image: bytemark/webdav:latest
+    container_name: zotero-init
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        chown -R www-data:www-data /var/lib/dav/data
+        chmod -R 755 /var/lib/dav/data
+    volumes:
+      - ${ARCANE}/zotero/.data:/var/lib/dav/data
+    restart: "no"
+
   zotero:
-    build:
-      context: .
-    image: zotero-webdav:local
-    pull_policy: never
-    container_name: zotero  
+    image: bytemark/webdav:latest
+    container_name: zotero
     restart: unless-stopped
     env_file:
       - .env
@@ -12,6 +21,9 @@ services:
       - ${ARCANE}/zotero/.data:/var/lib/dav/data
     networks:
       - asmodeus_default
+    depends_on:
+      zotero-init:
+        condition: service_completed_successfully
 
 networks:
   asmodeus_default:

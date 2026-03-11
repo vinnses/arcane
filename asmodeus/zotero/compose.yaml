@@ -1,6 +1,9 @@
 services:
   zotero:
-    image: bytemark/webdav:latest
+    build:
+      context: .
+    image: zotero-webdav:local
+    pull_policy: never
     container_name: zotero  
     restart: unless-stopped
     env_file:

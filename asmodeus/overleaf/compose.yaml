@@ -1,0 +1,74 @@
+services:
+  mongo:
+    image: ${MONGO_IMAGE}:${MONGO_VERSION}
+    container_name: mongo
+    command: --replSet overleaf
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "sh", "-c", "echo 'db.stats().ok' | mongosh localhost:27017/test --quiet"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ${ARCANE}/overleaf/.data/mongo:/data/db
+    networks:
+      - internal
+
+  mongo-init:
+    image: ${MONGO_IMAGE}:${MONGO_VERSION}
+    container_name: mongo-init
+    depends_on:
+      mongo:
+        condition: service_healthy
+    command:
+      - sh
+      - -c
+      - |
+        for i in 1 2 3 4 5; do
+          mongosh --host mongo:27017 --eval "
+            try { rs.status() }
+            catch(e) { rs.initiate({ _id: \"overleaf\", members: [{ _id: 0, host: \"mongo:27017\" }] }) }
+          " && exit 0
+          echo "[mongo-init] Attempt $i failed, retrying in 3s..."
+          sleep 3
+        done
+        echo "[mongo-init] Failed after 5 attempts"
+        exit 1
+    networks:
+      - internal
+    restart: on-failure
+
+  redis:
+    image: ${REDIS_IMAGE}
+    container_name: redis
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    volumes:
+      - ${ARCANE}/overleaf/.data/redis:/data
+    networks:
+      - internal
+
+  sharelatex:
+    image: ${OVERLEAF_IMAGE}:${OVERLEAF_VERSION}
+    container_name: sharelatex
+    depends_on:
+      mongo-init:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    env_file:
+      - .env
+      - overleaf.env
+    restart: unless-stopped
+    volumes:
+      - ${ARCANE}/overleaf/.data/sharelatex:/var/lib/overleaf
+    networks:
+      - internal
+      - asmodeus_default
+
+networks:
+  internal:
+    driver: bridge
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

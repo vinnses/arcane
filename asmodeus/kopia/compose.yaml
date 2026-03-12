@@ -17,9 +17,9 @@ services:
       - ${VAULT_PATH}:/app/sources/obsidian:ro
       - ${ARCANE}/webdav/.data/zotero:/app/sources/zotero:ro
     networks:
-      - asmodeus_default
+      - proxy_net
 
 networks:
-  asmodeus_default:
-    name: asmodeus_default
+  proxy_net:
+    name: proxy_net
     external: true

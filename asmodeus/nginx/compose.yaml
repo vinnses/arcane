@@ -12,9 +12,9 @@ services:
       - ${ARCANE}/nginx/logs:/var/log/nginx
       - ${ARCANE}/nginx/snippets:/etc/nginx/snippets:ro
     networks:
-      - asmodeus_default
+      - proxy_net
 
 networks:
-  asmodeus_default:
-    name: asmodeus_default
-    external: true
+  proxy_net:
+    name: proxy_net
+    driver: bridge

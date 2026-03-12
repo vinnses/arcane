@@ -64,11 +64,11 @@ services:
       - ${ARCANE}/overleaf/.data/sharelatex:/var/lib/overleaf
     networks:
       - internal
-      - asmodeus_default
+      - proxy_net
 
 networks:
   internal:
     driver: bridge
-  asmodeus_default:
-    name: asmodeus_default
+  proxy_net:
+    name: proxy_net
     external: true

@@ -20,8 +20,8 @@ services:
       - /etc/localtime:/etc/localtime:ro
     env_file:
       - .env
-    ports:
-      - '2283:2283'
+    expose:
+      - '2283'
     depends_on:
       - redis
       - database
@@ -30,7 +30,7 @@ services:
       disable: false
     networks:
       - default
-      - lilith
+      - proxy_net
 
   immich-machine-learning:
     container_name: immich-machine-learning
@@ -81,6 +81,6 @@ networks:
   default:
     driver: bridge
 
-  lilith:
-    name: lilith_default
+  proxy_net:
+    name: proxy_net
     external: true

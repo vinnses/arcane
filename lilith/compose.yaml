@@ -2,8 +2,8 @@ services:
   arcane:
     image: ghcr.io/ofkm/arcane:latest
     container_name: arcane
-    ports:
-      - '3552:3552'
+    expose:
+      - '3552'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ${ARCANE}/.data:/app/data
@@ -11,3 +11,10 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    networks:
+      - proxy_net
+
+networks:
+  proxy_net:
+    name: proxy_net
+    external: true

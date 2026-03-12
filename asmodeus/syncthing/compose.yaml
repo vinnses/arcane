@@ -13,9 +13,9 @@ services:
       - ${VAULT_PATH}:/var/syncthing/vault
       - ${ARCANE}/syncthing/.data:/var/syncthing/config
     networks:
-      - asmodeus_default
+      - proxy_net
 
 networks:
-  asmodeus_default:
-    name: asmodeus_default
+  proxy_net:
+    name: proxy_net
     external: true

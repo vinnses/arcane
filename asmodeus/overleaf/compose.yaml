@@ -62,6 +62,7 @@ services:
     restart: unless-stopped
     volumes:
       - ${ARCANE}/overleaf/.data/sharelatex:/var/lib/overleaf
+      - texlive:/usr/local/texlive
     networks:
       - internal
       - asmodeus_default
@@ -72,3 +73,6 @@ networks:
   asmodeus_default:
     name: asmodeus_default
     external: true
+
+volumes:
+  texlive:

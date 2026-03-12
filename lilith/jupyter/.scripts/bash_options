@@ -1,0 +1,21 @@
+HISTFILE=/workspace/.tmp/.bash_history
+HISTCONTROL=ignorespace:ignoredups:erasedups
+HISTSIZE=-1
+HISTFILESIZE=-1
+
+shopt -s histappend
+
+PROMPT_COMMAND="history -a; history -c; history -r; $PROMPT_COMMAND"
+
+if [ -x /usr/bin/dircolors ]; then
+    test -r "$HOME/.dircolors" && eval "$(dircolors -b "$HOME/.dircolors")" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias work='cd /workspace'

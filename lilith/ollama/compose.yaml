@@ -3,9 +3,9 @@ services:
     image: ollama/ollama:latest
     container_name: ollama
     networks:
-      - proxy_net
-    expose:
-      - '11434'
+      - lilith_default
+    ports:
+      - "11434:11434"
     tty: true
     stdin_open: true
     env_file:
@@ -22,6 +22,6 @@ services:
     restart: unless-stopped
 
 networks:
-  proxy_net:
-    name: proxy_net
+  lilith_default:
+    name: lilith_default
     external: true

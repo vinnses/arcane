@@ -12,9 +12,9 @@ services:
       - ${ARCANE}/nginx/logs:/var/log/nginx
       - ${ARCANE}/nginx/snippets:/etc/nginx/snippets:ro
     networks:
-      - proxy_net
+      - lilith_default
 
 networks:
-  proxy_net:
-    name: proxy_net
-    driver: bridge
+  lilith_default:
+    name: lilith_default
+    external: true

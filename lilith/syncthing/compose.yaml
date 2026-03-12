@@ -13,9 +13,9 @@ services:
       - ${VAULT_PATH}:/var/syncthing/vault
       - ${ARCANE}/syncthing/.data:/var/syncthing/config
     networks:
-      - proxy_net
+      - lilith_default
 
 networks:
-  proxy_net:
-    name: proxy_net
+  lilith_default:
+    name: lilith_default
     external: true

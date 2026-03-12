@@ -26,6 +26,8 @@ services:
       timeout: 5s
       retries: 6
       start_period: 30s
+    networks:
+      - asmodeus_default
     restart: unless-stopped
 
   dnsmasq:
@@ -42,3 +44,8 @@ services:
     command: >
       sh -c "apk add --no-cache dnsmasq && dnsmasq --keep-in-foreground"
     restart: unless-stopped
+
+networks:
+  asmodeus_default:
+    name: asmodeus_default
+    external: true

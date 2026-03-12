@@ -26,6 +26,8 @@ services:
       timeout: 5s
       retries: 6
       start_period: 30s
+    networks:
+      - lilith_default
     restart: unless-stopped
 
   dnsmasq:
@@ -42,3 +44,8 @@ services:
     command: >
       sh -c "apk add --no-cache dnsmasq && dnsmasq --keep-in-foreground"
     restart: unless-stopped
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

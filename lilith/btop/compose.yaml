@@ -7,10 +7,10 @@ services:
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
-    expose:
-      - '8686'
+    ports:
+      - "8686:8686"
     networks:
-      - proxy_net
+      - lilith_default
     stdin_open: true
     tty: true
     deploy:
@@ -22,6 +22,6 @@ services:
               capabilities: [gpu]
 
 networks:
-  proxy_net:
-    name: proxy_net
+  lilith_default:
+    name: lilith_default
     external: true

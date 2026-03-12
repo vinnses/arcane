@@ -21,12 +21,12 @@ services:
     volumes:
       - ${ARCANE}/webdav/.data:/var/lib/dav/data
     networks:
-      - proxy_net
+      - asmodeus_default
     depends_on:
       webdav-init:
         condition: service_completed_successfully
 
 networks:
-  proxy_net:
-    name: proxy_net
+  asmodeus_default:
+    name: asmodeus_default
     external: true

@@ -7,7 +7,7 @@ set -euo pipefail
 # Run once after cloning. Safe to re-run (idempotent if already renamed).
 # =============================================================================
 
-PLACEHOLDER="myproject"
+PLACEHOLDER="playground"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 

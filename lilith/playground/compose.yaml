@@ -14,10 +14,22 @@ x-service-base: &service_base
   build: *build_config
   image: ${COMPOSE_PROJECT_NAME}:${VERSION}
   pull_policy: build
+  env_file: [.env]
   volumes:
-    - ./:/workspace
+    - ./.data:/workspace
+    - /home/${USER}/.gitconfig:/home/${USER}/.gitconfig:ro
+    - /home/${USER}/.ssh:/home/${USER}/.ssh:ro
   tty: true
   stdin_open: true
+
+x-gpu: &gpu
+  deploy:
+    resources:
+      reservations:
+        devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
 
 # ==============================================================================
 # SERVICES
@@ -26,14 +38,16 @@ services:
 
   # ── Dev Shell (devcontainer attach / docker exec) ──────────────────────────
   dev:
-    <<: *service_base
+    <<: [*service_base, *gpu]
     container_name: ${COMPOSE_PROJECT_NAME}-dev
     profiles: ["dev"]
     command: make sleep
+    networks:
+      - lilith_default
 
-  # ── Jupyter Lab / Notebook ─────────────────────────────────────────────────
+  # ── Jupyter Lab ─────────────────────────────────────────────────────────────
   jupyter:
-    <<: *service_base
+    <<: [*service_base, *gpu]
     container_name: ${COMPOSE_PROJECT_NAME}-jupyter
     profiles: ["jupyter"]
     ports:
@@ -46,10 +60,12 @@ services:
         --NotebookApp.token=${JUPYTER_TOKEN:-changeme}
         --ServerApp.root_dir=/workspace
     restart: unless-stopped
+    networks:
+      - lilith_default
 
   # ── Code Server (VS Code in browser) ───────────────────────────────────────
   code-server:
-    <<: *service_base
+    <<: [*service_base, *gpu]
     container_name: ${COMPOSE_PROJECT_NAME}-code-server
     profiles: ["code-server"]
     ports:
@@ -63,17 +79,13 @@ services:
         --disable-telemetry
         /workspace
     restart: unless-stopped
+    networks:
+      - lilith_default
 
-  # ── GPU Example (uncomment and adapt) ──────────────────────────────────────
-  # gpu-dev:
-  #   <<: *service_base
-  #   container_name: ${COMPOSE_PROJECT_NAME}-gpu
-  #   profiles: ["gpu"]
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
-  #   command: make sleep
+# ==============================================================================
+# NETWORKS
+# ==============================================================================
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

@@ -1,0 +1,79 @@
+name: ${COMPOSE_PROJECT_NAME}
+
+# ==============================================================================
+# BASE CONFIGURATION
+# ==============================================================================
+x-build-config: &build_config
+  context: .
+  args:
+    - USER=${USER}
+    - UID=${UID}
+    - GID=${GID}
+
+x-service-base: &service_base
+  build: *build_config
+  image: ${COMPOSE_PROJECT_NAME}:${VERSION}
+  pull_policy: build
+  volumes:
+    - ./:/workspace
+  tty: true
+  stdin_open: true
+
+# ==============================================================================
+# SERVICES
+# ==============================================================================
+services:
+
+  # ── Dev Shell (devcontainer attach / docker exec) ──────────────────────────
+  dev:
+    <<: *service_base
+    container_name: ${COMPOSE_PROJECT_NAME}-dev
+    profiles: ["dev"]
+    command: make sleep
+
+  # ── Jupyter Lab / Notebook ─────────────────────────────────────────────────
+  jupyter:
+    <<: *service_base
+    container_name: ${COMPOSE_PROJECT_NAME}-jupyter
+    profiles: ["jupyter"]
+    ports:
+      - "${JUPYTER_PORT:-8888}:8888"
+    command: >
+      jupyter lab
+        --ip=0.0.0.0
+        --port=8888
+        --no-browser
+        --NotebookApp.token=${JUPYTER_TOKEN:-changeme}
+        --ServerApp.root_dir=/workspace
+    restart: unless-stopped
+
+  # ── Code Server (VS Code in browser) ───────────────────────────────────────
+  code-server:
+    <<: *service_base
+    container_name: ${COMPOSE_PROJECT_NAME}-code-server
+    profiles: ["code-server"]
+    ports:
+      - "${CODE_SERVER_PORT:-8443}:8443"
+    environment:
+      - PASSWORD=${CODE_SERVER_PASSWORD:-changeme}
+    command: >
+      code-server
+        --bind-addr 0.0.0.0:8443
+        --auth password
+        --disable-telemetry
+        /workspace
+    restart: unless-stopped
+
+  # ── GPU Example (uncomment and adapt) ──────────────────────────────────────
+  # gpu-dev:
+  #   <<: *service_base
+  #   container_name: ${COMPOSE_PROJECT_NAME}-gpu
+  #   profiles: ["gpu"]
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   command: make sleep

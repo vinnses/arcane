@@ -1,0 +1,67 @@
+# Data
+/data/
+*.csv
+*.parquet
+*.pkl
+*.xls
+*.xlsx
+
+# Temp
+*.tmp*
+.nux
+.entrypoint.lock
+.todo.md
+.DS_Store
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+*.env
+!./.env
+.venv/
+env/
+venv/
+
+# Testing & Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Ruff / Mypy
+.ruff_cache/
+.mypy_cache/
+.dmypy.json
+
+# Logs
+logs/
+*.log
+
+# IDE
+.idea/
+.vscode/

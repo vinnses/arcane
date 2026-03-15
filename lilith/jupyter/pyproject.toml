@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "myproject"
+dynamic = ["version"]
+description = "Data science workspace"
+readme = "README.md"
+requires-python = "~=3.12.0"
+license = { file = "LICENSE" }
+dependencies = [
+    "pandas>=2.3.0",
+    "pyyaml>=6.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[dependency-groups]
+notebook = [
+    "jupyterlab>=4.0.0",
+    "ipykernel>=7.0.0",
+    "ipywidgets>=8.0.0",
+    "notebook>=7.0.0",
+]
+science = [
+    "matplotlib>=3.9.0",
+    "seaborn>=0.13.0",
+    "scikit-learn>=1.5.0",
+    "scipy>=1.14.0",
+]
+dev = [
+    "pytest>=9.0.0",
+    "ruff>=0.14.0",
+    "pip>=25.0",
+]
+
+# =============================================================================
+# TOOL CONFIGURATION
+# =============================================================================
+
+[tool.hatch.version]
+path = ".env"
+pattern = "VERSION=['\"]?(?P<version>[^'\"\\s]+)['\"]?"
+
+[tool.hatch.build]
+packages = ["myproject"]
+
+[tool.hatch.build.targets.wheel]
+force-include = { "pyproject.toml" = "pyproject.toml" }
+
+[tool.ruff]
+line-length = 99
+src = ["myproject"]
+include = ["pyproject.toml", "myproject/**/*.py"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["myproject"]
+force-sort-within-sections = true

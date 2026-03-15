@@ -123,16 +123,27 @@ MANIFEST="$BACKUP_DIR/manifest.json"
     first=true
     for service in "${!CONTAINERS[@]}"; do
         container="${CONTAINERS[$service]}"
-        image=$(docker inspect "$container" --format '{{.Config.Image}}' 2>/dev/null || echo "unknown")
-        digest=$(docker inspect "$container" --format '{{.Image}}' 2>/dev/null || echo "unknown")
+        # Config.Image = the tag used to create the container (e.g. :release)
+        config_image=$(docker inspect "$container" --format '{{.Config.Image}}' 2>/dev/null || echo "unknown")
+        # .Image = local image ID (not pullable)
+        local_id=$(docker inspect "$container" --format '{{.Image}}' 2>/dev/null || echo "unknown")
+
+        # RepoDigests = registry-pullable immutable reference (what we actually need)
+        # If the image was pulled with a digest already (e.g. postgres@sha256:...),
+        # Config.Image already contains it. Otherwise, resolve via RepoDigests.
+        if [[ "$config_image" == *"@sha256:"* ]]; then
+            pullable_image="$config_image"
+        else
+            pullable_image=$(docker image inspect "$config_image" --format '{{index .RepoDigests 0}}' 2>/dev/null || echo "$config_image")
+        fi
 
         $first || echo ","
         first=false
 
         printf '    "%s": {\n' "$service"
         printf '      "container": "%s",\n' "$container"
-        printf '      "image": "%s",\n' "$image"
-        printf '      "digest": "%s"\n' "$digest"
+        printf '      "image": "%s",\n' "$pullable_image"
+        printf '      "local_id": "%s"\n' "$local_id"
         printf '    }'
     done
 

@@ -6,12 +6,11 @@
 #
 # What it does:
 #   1. Reads manifest.json and .env.restore from the backup
-#   2. Generates a temporary docker-compose.override.yaml pinning exact image digests
+#   2. Generates docker-compose.override.yaml inside the backup dir, pinning exact image digests
 #   3. Starts only the database, waits for healthy
 #   4. Restores pg_dumpall.sql
 #   5. Starts remaining services
 #   6. Validates all healthchecks
-#   7. Cleans up the temporary override
 #
 # Prerequisites:
 #   - UPLOAD_LOCATION and DB_DATA_LOCATION paths must exist on the target device
@@ -24,7 +23,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 COMPOSE_FILE="$PROJECT_DIR/compose.yaml"
-OVERRIDE_FILE="$PROJECT_DIR/docker-compose.override.yaml"
 
 if [[ ! -f "$COMPOSE_FILE" ]]; then
     echo "[error] compose.yaml not found at $PROJECT_DIR" >&2
@@ -53,6 +51,7 @@ fi
 MANIFEST="$BACKUP_DIR/manifest.json"
 SQL_DUMP="$BACKUP_DIR/pg_dumpall.sql"
 ENV_RESTORE="$BACKUP_DIR/.env.restore"
+OVERRIDE_FILE="$BACKUP_DIR/docker-compose.override.yaml"
 
 for f in "$MANIFEST" "$SQL_DUMP" "$ENV_RESTORE"; do
     if [[ ! -f "$f" ]]; then
@@ -160,14 +159,6 @@ EOF
 echo "[restore] Override written: $OVERRIDE_FILE"
 echo ""
 
-# --- Cleanup function ---
-cleanup_override() {
-    if [[ -f "$OVERRIDE_FILE" ]]; then
-        rm -f "$OVERRIDE_FILE"
-        echo "[restore] Cleaned up override file"
-    fi
-}
-
 # --- Ensure no conflicting containers ---
 echo "[restore] Stopping any existing Immich containers..."
 docker compose -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" --env-file "$ENV_FILE" down 2>/dev/null || true
@@ -197,7 +188,6 @@ until docker compose -f "$COMPOSE_FILE" -f "$OVERRIDE_FILE" --env-file "$ENV_FIL
     exec -T database pg_isready -U "$DB_USER" &>/dev/null; do
     ((RETRIES--)) || {
         echo "[error] PostgreSQL did not become ready in time" >&2
-        cleanup_override
         exit 1
     }
     sleep 2
@@ -254,16 +244,16 @@ if $ALL_HEALTHY; then
     echo ""
     echo "All services are healthy. Verify your data in the Immich UI."
     echo ""
-    echo "Once confirmed working, you can:"
-    echo "  1. Remove the override:  rm $OVERRIDE_FILE"
-    echo "  2. Update IMMICH_VERSION in .env to the pinned version or 'release'"
-    echo "  3. Restart:  docker compose -f $COMPOSE_FILE --env-file $ENV_FILE up -d"
+    echo "Once confirmed working, restart without the override:"
+    echo "  docker compose -f $COMPOSE_FILE --env-file $ENV_FILE down"
+    echo "  docker compose -f $COMPOSE_FILE --env-file $ENV_FILE up -d"
+    echo ""
+    echo "Override preserved in backup: $OVERRIDE_FILE"
 else
     echo "=== Restore completed with warnings ==="
     echo ""
     echo "Some services may not be healthy. Check logs:"
     echo "  docker compose -f $COMPOSE_FILE -f $OVERRIDE_FILE --env-file $ENV_FILE logs"
     echo ""
-    echo "The override file is kept for debugging: $OVERRIDE_FILE"
-    echo "Do NOT delete it until all services are verified."
+    echo "Override preserved in backup: $OVERRIDE_FILE"
 fi

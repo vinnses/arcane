@@ -1,0 +1,19 @@
+# =============================================================================
+# Project Settings
+# =============================================================================
+# This file is loaded by myproject.config.load_config()
+# Customize as needed for your project.
+
+project:
+  name: myproject
+  version: "0.1.0"
+
+logging:
+  level: DEBUG
+  max_bytes: 10485760  # 10 MB
+  backup_count: 5
+
+# Add your project-specific settings below
+# example:
+#   api_url: "https://api.example.com"
+#   batch_size: 32

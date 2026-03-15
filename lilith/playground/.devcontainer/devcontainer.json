@@ -1,0 +1,99 @@
+{
+  "name": "Data Science Workspace",
+
+  "dockerComposeFile": ["../compose.yaml"],
+  "service": "dev",
+  "runServices": ["dev"],
+  "overrideCommand": true,
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        // --- Python ---
+        "charliermarsh.ruff",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.debugpy",
+
+        // --- Jupyter ---
+        "ms-toolsai.jupyter",
+        "ms-toolsai.jupyter-keymap",
+        "ms-toolsai.jupyter-renderers",
+
+        // --- Markdown ---
+        "yzhang.markdown-all-in-one",
+        "davidanson.vscode-markdownlint",
+
+        // --- Data / Config ---
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+
+        // --- Utilities ---
+        "eamodio.gitlens",
+        "gruntfuggly.todo-tree",
+        "njpwerner.autodocstring"
+      ],
+
+      "settings": {
+        // ── Editor ──
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+        "editor.rulers": [80, 120],
+        "editor.formatOnSave": true,
+        "editor.inlineSuggest.enabled": false,
+
+        // ── Python ──
+        "[python]": {
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+          "python.terminal.activateEnvironment": true,
+          "python.analysis.diagnosticMode": "workspace"
+        },
+
+        "[yaml]": {
+          "editor.tabSize": 2,
+          "editor.formatOnSave": true,
+          "editor.defaultFormatter": "redhat.vscode-yaml"
+        },
+
+        "[markdown]": {
+          "editor.formatOnSave": false
+        },
+
+        // ── Jupyter ──
+        "notebook.output.scrolling": true,
+        "jupyter.askForKernelRestart": false,
+
+        // ── Appearance ──
+        "editor.fontFamily": "Fira Code, Cascadia Code, Consolas, 'Courier New', monospace",
+        "editor.fontLigatures": true,
+        "editor.fontSize": 14,
+        "editor.bracketPairColorization.enabled": true,
+        "editor.guides.bracketPairs": true,
+        "editor.minimap.enabled": true,
+
+        // ── Terminal ──
+        "terminal.integrated.fontFamily": "Fira Code, Cascadia Code, monospace",
+        "terminal.integrated.fontSize": 14,
+
+        // ── Files ──
+        "files.autoSave": "onFocusChange",
+        "files.exclude": {
+          "**/.git": true,
+          "**/__pycache__": true,
+          "**/.ipynb_checkpoints": true,
+          "**/build": true,
+          "**/dist": true
+        },
+
+        // ── Noise control ──
+        "security.workspace.trust.enabled": false,
+        "github.copilot.enable": { "*": false },
+        "extensions.ignoreRecommendations": true
+      }
+    }
+  }
+}

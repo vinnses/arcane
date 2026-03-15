@@ -4,6 +4,7 @@
 
 PYTHON = python
 UV = uv
+PROJECT = playground
 
 ifneq (,$(wildcard ./.env))
     include .env

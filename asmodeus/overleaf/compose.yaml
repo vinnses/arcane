@@ -20,20 +20,9 @@ services:
     depends_on:
       mongo:
         condition: service_healthy
-    command:
-      - sh
-      - -c
-      - |
-        for i in 1 2 3 4 5; do
-          mongosh --host mongo:27017 --eval "
-            try { rs.status() }
-            catch(e) { rs.initiate({ _id: \"overleaf\", members: [{ _id: 0, host: \"mongo:27017\" }] }) }
-          " && exit 0
-          echo "[mongo-init] Attempt $i failed, retrying in 3s..."
-          sleep 3
-        done
-        echo "[mongo-init] Failed after 5 attempts"
-        exit 1
+    volumes:
+      - ./mongo-init.sh:/mongo-init.sh:ro
+    command: ["bash", "/mongo-init.sh"]
     networks:
       - internal
     restart: on-failure

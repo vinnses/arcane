@@ -13,7 +13,7 @@ import tomllib
 
 import yaml
 
-from myproject import PACKAGE_ROOT, PROJECT_ROOT
+from cuda import PACKAGE_ROOT, PROJECT_ROOT
 
 logger = logging.getLogger(__name__)
 

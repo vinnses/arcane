@@ -82,6 +82,34 @@ services:
     networks:
       - lilith_default
 
+  # ── Btop (GPU/system monitor via web) ────────────────────────────────────
+  btop:
+    build:
+      context: .
+      dockerfile: Dockerfile.btop
+    image: ${COMPOSE_PROJECT_NAME}-btop:${VERSION}
+    pull_policy: build
+    container_name: ${COMPOSE_PROJECT_NAME}-btop
+    profiles: ["btop"]
+    pid: "host"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "8686:8686"
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    networks:
+      - lilith_default
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
 # ==============================================================================
 # NETWORKS
 # ==============================================================================

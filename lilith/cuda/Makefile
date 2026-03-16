@@ -4,7 +4,7 @@
 
 PYTHON = python
 UV = uv
-PROJECT = playground
+PROJECT = cuda
 
 ifneq (,$(wildcard ./.env))
     include .env
@@ -131,6 +131,11 @@ notebook:
 .PHONY: code-server
 code-server:
 	docker compose --profile code-server up
+
+## Start Btop (GPU monitor)
+.PHONY: btop
+btop:
+	docker compose --profile btop up
 
 #################################################################################
 # CLEANUP                                                                       #

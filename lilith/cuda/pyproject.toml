@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "playground"
+name = "cuda"
 dynamic = ["version"]
-description = "Data science & ML/DL playground"
+description = "CUDA GPU compute workspace"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { file = "LICENSE" }
@@ -58,19 +58,19 @@ path = ".env"
 pattern = "VERSION=['\"]?(?P<version>[^'\"\\s]+)['\"]?"
 
 [tool.hatch.build]
-packages = ["playground"]
+packages = ["cuda"]
 
 [tool.hatch.build.targets.wheel]
 force-include = { "pyproject.toml" = "pyproject.toml" }
 
 [tool.ruff]
 line-length = 99
-src = ["playground"]
-include = ["pyproject.toml", "playground/**/*.py"]
+src = ["cuda"]
+include = ["pyproject.toml", "cuda/**/*.py"]
 
 [tool.ruff.lint]
 extend-select = ["I"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["playground"]
+known-first-party = ["cuda"]
 force-sort-within-sections = true

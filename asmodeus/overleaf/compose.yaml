@@ -49,9 +49,13 @@ services:
       - .env
       - overleaf.env
     restart: unless-stopped
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
     volumes:
       - ${ARCANE}/overleaf/.data/sharelatex:/var/lib/overleaf
       - texlive:/usr/local/texlive
+      - ${ARCANE}/overleaf/scripts/entrypoint.sh:/usr/local/bin/entrypoint.sh:ro
+      - ${ARCANE}/overleaf/scripts/texlive-install.sh:/usr/local/bin/texlive-install.sh:ro
+      - ${ARCANE}/overleaf/scripts/texlive-mirror.sh:/usr/local/bin/texlive-mirror.sh:ro
     networks:
       - internal
       - asmodeus_default

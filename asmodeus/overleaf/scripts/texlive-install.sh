@@ -3,10 +3,21 @@ set -euo pipefail
 
 MARKER="/usr/local/texlive/.scheme-full-installed"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MIRROR_SCRIPT="${SCRIPT_DIR}/texlive-mirror.sh"
 
 log() {
     echo "[texlive] $(date '+%Y-%m-%d %H:%M:%S') $*"
 }
+
+if ! command -v tlmgr >/dev/null 2>&1; then
+    log "ERROR: tlmgr not found. Is this running inside the sharelatex container?"
+    exit 1
+fi
+
+if [[ ! -x "$MIRROR_SCRIPT" ]]; then
+    log "ERROR: mirror script not found or not executable: ${MIRROR_SCRIPT}"
+    exit 1
+fi
 
 # Check if already installed
 if [[ -f "$MARKER" ]]; then
@@ -19,7 +30,7 @@ start_time=$(date +%s)
 
 # Get best mirror
 log "Selecting fastest CTAN mirror..."
-mirror=$("${SCRIPT_DIR}/texlive-mirror.sh")
+mirror="$($MIRROR_SCRIPT)"
 
 log "Using mirror: ${mirror}"
 tlmgr option repository "${mirror}"

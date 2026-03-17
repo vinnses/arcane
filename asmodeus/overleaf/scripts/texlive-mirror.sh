@@ -10,13 +10,6 @@ MIRRORS=(
     "https://ftp.jaist.ac.jp/pub/CTAN/systems/texlive/tlnet"
 )
 
-# If TEXLIVE_MIRROR is set, use it directly
-if [[ -n "${TEXLIVE_MIRROR:-}" ]]; then
-    echo "[mirror] Using user-specified mirror: ${TEXLIVE_MIRROR}" >&2
-    echo "${TEXLIVE_MIRROR}"
-    exit 0
-fi
-
 echo "[mirror] Testing ${#MIRRORS[@]} CTAN mirrors..." >&2
 
 best_mirror=""

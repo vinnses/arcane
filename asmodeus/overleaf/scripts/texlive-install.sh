@@ -10,7 +10,19 @@ log() {
 }
 
 get_local_texlive_year() {
-    tlmgr --version | grep -oE 'TeX Live [0-9]{4}' | awk '{print $3}' | head -n1
+    local year
+
+    # Strategy 1: year-named subdirectory under the TeX Live installation root
+    year=$(ls /usr/local/texlive/ 2>/dev/null | grep -E '^[0-9]{4}$' | sort -n | tail -n1)
+    if [[ -n "$year" ]]; then echo "$year"; return 0; fi
+
+    # Strategy 2: parse "version YYYY" from tlmgr --version output
+    year=$(tlmgr --version 2>/dev/null | grep -oE 'version [0-9]{4}' | awk '{print $2}' | head -n1)
+    if [[ -n "$year" ]]; then echo "$year"; return 0; fi
+
+    # Strategy 3: parse installation path "texlive/YYYY" from tlmgr --version output
+    year=$(tlmgr --version 2>/dev/null | grep -oE 'texlive/[0-9]{4}' | grep -oE '[0-9]{4}' | head -n1)
+    echo "$year"
 }
 
 set_historic_repository() {

@@ -1,0 +1,35 @@
+services:
+  vibe-code:
+    build:
+      context: .
+      args:
+        USER_UID: 1000
+        USER_GID: 1000
+    container_name: vibe-code
+    stdin_open: true
+    tty: true
+    working_dir: /projects
+
+    volumes:
+      # Project data — read-write (skill writes outputs here)
+      - /home/vlgoncalves/Documents/ClaudeData:/projects/ClaudeData
+
+      # Claude credentials — read-only (re-auth manual on token expiry)
+      - ${HOME}/.claude:/home/claude/.claude:ro
+
+      # Claude user config — read-only
+      - ${HOME}/.claude.json:/home/claude/.claude.json:ro
+
+      # Session persistence across container recreations
+      - sessions:/home/claude/.sessions
+
+    environment:
+      - CLAUDE_CONFIG_DIR=/home/claude/.claude
+      # Uncomment to force a specific model:
+      # - ANTHROPIC_MODEL=claude-sonnet-4-6
+
+    # No network restrictions — claude code needs api.anthropic.com,
+    # npm registry, pypi, github. Firewall can be added later.
+
+volumes:
+  sessions:

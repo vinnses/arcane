@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     entrypoint: ["/opt/vibe-code/vibe-init.sh"]
-    working_dir: /projects/ClaudeData
+    working_dir: /projects
     stdin_open: true
     tty: true
 
@@ -14,7 +14,10 @@ services:
       # Init script — read-only
       - ${ARCANE}/vibe-code/vibe-init.sh:/opt/vibe-code/vibe-init.sh:ro
 
-      # Project data — read-write
+      # Workspace root — persists all projects
+      - projects:/projects
+
+      # Project data — bind mount inside /projects
       - ${VIBE_DATA_PATH}:/projects/ClaudeData
 
       # Claude credentials — read-only
@@ -33,6 +36,7 @@ services:
       - lilith_default
 
 volumes:
+  projects:
   sessions:
 
 networks:

@@ -19,8 +19,8 @@ if ! id claude &>/dev/null; then
     useradd -m -u "${PUID:-1000}" -g "${PGID:-1000}" -s /bin/bash claude 2>/dev/null || true
 fi
 
-chown claude:claude /projects/ClaudeData 2>/dev/null || true
+chown claude:claude /projects 2>/dev/null || true
 chown -R claude:claude /home/claude/.sessions 2>/dev/null || true
 
 echo ">>> [vibe-init] Ready. Use: docker exec -it vibe-code su - claude"
-exec su - claude -c "cd /projects/ClaudeData && claude --dangerously-skip-permissions"
+exec su - claude -c "cd /projects && claude --dangerously-skip-permissions"

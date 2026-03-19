@@ -6,7 +6,9 @@ services:
     env_file:
       - .env
     entrypoint: ["/opt/vibe-code/vibe-init.sh"]
-    working_dir: /projects
+    working_dir: /projects/ClaudeData
+    stdin_open: true
+    tty: true
 
     volumes:
       # Init script — read-only
@@ -15,10 +17,8 @@ services:
       # Project data — read-write
       - ${VIBE_DATA_PATH}:/projects/ClaudeData
 
-      # Claude credentials — read-only (re-auth manual on token expiry)
+      # Claude credentials — read-only
       - ${HOME}/.claude:/home/claude/.claude:ro
-
-      # Claude user config — read-only
       - ${HOME}/.claude.json:/home/claude/.claude.json:ro
 
       # Session persistence across container recreations
@@ -28,9 +28,6 @@ services:
       - CLAUDE_CONFIG_DIR=/home/claude/.claude
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
-      - VIBE_PORT=${VIBE_PORT:-7681}
-      - VIBE_USER=${VIBE_USER:-}
-      - VIBE_PASSWORD=${VIBE_PASSWORD:-}
 
     networks:
       - lilith_default

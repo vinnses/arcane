@@ -6,21 +6,34 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    entrypoint: ["bash", "-c", "set -e; for s in /opt/vibe/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
+    entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
+    working_dir: /home/${VIBE_USER:-vibecoder}/projects
     stdin_open: true
     tty: true
 
     volumes:
-      # Init scripts — read-only
-      - ${ARCANE}/vibe/init.d:/opt/vibe/init.d:ro
+      # Init scripts — read-write (agents can generate new ones)
+      - ${ARCANE}/vibe/init.d:/home/${VIBE_USER:-vibecoder}/init.d
 
-      # User configs (bashrc, gitconfig, authorized_keys) — read-only
-      - ${ARCANE}/vibe/data/user:/opt/vibe/user:ro
+      # Dotfiles — mapped directly into home, editable
+      - ${ARCANE}/vibe/dotfiles/.bashrc:/home/${VIBE_USER:-vibecoder}/.bashrc:ro
+      - ${ARCANE}/vibe/dotfiles/.bashrc.d:/home/${VIBE_USER:-vibecoder}/.bashrc.d:ro
+      - ${ARCANE}/vibe/dotfiles/.gitconfig:/home/${VIBE_USER:-vibecoder}/.gitconfig
 
-      # Workspace — host bind mount for projects
-      - ${VIBE_CODE_PATH}:/codes
+      # Skills and agents definitions — versionado com arcane
+      - ${ARCANE}/vibe/skills:/home/${VIBE_USER:-vibecoder}/skills:ro
+      - ${ARCANE}/vibe/agents:/home/${VIBE_USER:-vibecoder}/agents:ro
 
-      # Persistent home — tool configs survive container recreations
+      # Projects — host bind mount
+      - ${VIBE_CODE_PATH}:/home/${VIBE_USER:-vibecoder}/projects
+
+      # Agent configs (.claude/, etc.) — persists outside named volume
+      - ${ARCANE}/vibe/.data/agents:/home/${VIBE_USER:-vibecoder}/.agents
+
+      # SSH keys — persists outside named volume
+      - ${ARCANE}/vibe/.data/ssh:/home/${VIBE_USER:-vibecoder}/.ssh
+
+      # Persistent home (catch-all for everything else)
       - vibe-home:/home/${VIBE_USER:-vibecoder}
 
     environment:
@@ -30,6 +43,14 @@ services:
 
     ports:
       - "${VIBE_SSH_PORT:-2222}:22"
+
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
 
     networks:
       - lilith_default

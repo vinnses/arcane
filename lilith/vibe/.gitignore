@@ -1,2 +1,2 @@
 .env
-data/user/authorized_keys
+.data/

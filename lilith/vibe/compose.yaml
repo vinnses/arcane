@@ -6,29 +6,22 @@ services:
     env_file:
       - .env
     entrypoint: ["/opt/vibe/vibe-init.sh"]
-    working_dir: /projects
     stdin_open: true
     tty: true
 
     volumes:
-      # Init script — read-only
+      # Init scripts — read-only
       - ${ARCANE}/vibe/vibe-init.sh:/opt/vibe/vibe-init.sh:ro
+      - ${ARCANE}/vibe/init.d:/opt/vibe/init.d:ro
 
-      # Workspace root — persists all projects
-      - projects:/projects
+      # Workspace — host bind mount for projects
+      - ${VIBE_CODE_PATH}:/vibe/code
 
-      # Projects data — bind mount inside /projects
-      - ${CLAUDE_ARCH_PATH}:/projects/ClaudeArch
-
-      # Claude credentials — read-only
-      - ${HOME}/.claude:/home/claude/.claude:ro
-      - ${HOME}/.claude.json:/home/claude/.claude.json:ro
-
-      # Session persistence across container recreations
-      - sessions:/home/claude/.sessions
+      # Persistent home — survives container recreations
+      # Tool configs (e.g. ~/.claude, ~/.gemini) live here
+      - vibe-home:/vibe/home
 
     environment:
-      - CLAUDE_CONFIG_DIR=/home/claude/.claude
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
 
@@ -36,8 +29,7 @@ services:
       - lilith_default
 
 volumes:
-  projects:
-  sessions:
+  vibe-home:
 
 networks:
   lilith_default:

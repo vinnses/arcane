@@ -5,25 +5,29 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    entrypoint: ["/opt/vibe/vibe-init.sh"]
+    entrypoint: ["bash", "-c", "set -e; for s in /opt/vibe/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
     stdin_open: true
     tty: true
 
     volumes:
       # Init scripts — read-only
-      - ${ARCANE}/vibe/vibe-init.sh:/opt/vibe/vibe-init.sh:ro
       - ${ARCANE}/vibe/init.d:/opt/vibe/init.d:ro
 
-      # Workspace — host bind mount for projects
-      - ${VIBE_CODE_PATH}:/vibe/code
+      # SSH authorized keys — read-only (for Antigravity)
+      - ${ARCANE}/vibe/ssh:/opt/vibe/ssh:ro
 
-      # Persistent home — survives container recreations
-      # Tool configs (e.g. ~/.claude, ~/.gemini) live here
-      - vibe-home:/vibe/home
+      # Workspace — host bind mount for projects
+      - ${VIBE_CODE_PATH}:/codes
+
+      # Persistent home — tool configs survive container recreations
+      - vibe-home:/home/vibe
 
     environment:
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
+
+    ports:
+      - "${VIBE_SSH_PORT:-2222}:22"
 
     networks:
       - lilith_default

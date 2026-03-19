@@ -1,0 +1,45 @@
+services:
+  code:
+    image: node:20-bookworm
+    container_name: vibe
+    restart: unless-stopped
+    env_file:
+      - .env
+    entrypoint: ["/opt/vibe/vibe-init.sh"]
+    working_dir: /projects
+    stdin_open: true
+    tty: true
+
+    volumes:
+      # Init script — read-only
+      - ${ARCANE}/vibe/vibe-init.sh:/opt/vibe/vibe-init.sh:ro
+
+      # Workspace root — persists all projects
+      - projects:/projects
+
+      # Projects data — bind mount inside /projects
+      - ${CLAUDE_ARCH_PATH}:/projects/ClaudeArch
+
+      # Claude credentials — read-only
+      - ${HOME}/.claude:/home/claude/.claude:ro
+      - ${HOME}/.claude.json:/home/claude/.claude.json:ro
+
+      # Session persistence across container recreations
+      - sessions:/home/claude/.sessions
+
+    environment:
+      - CLAUDE_CONFIG_DIR=/home/claude/.claude
+      - PUID=${PUID:-1000}
+      - PGID=${PGID:-1000}
+
+    networks:
+      - lilith_default
+
+volumes:
+  projects:
+  sessions:
+
+networks:
+  lilith_default:
+    name: lilith_default
+    external: true

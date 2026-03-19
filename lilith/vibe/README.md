@@ -1,6 +1,6 @@
 # Vibe
 
-Containerized development environment for AI-assisted coding. Tool-agnostic — supports Claude Code, Gemini CLI, Codex CLI, or any other agent.
+Containerized development environment for AI-assisted coding. Tool-agnostic — supports Claude Code, Gemini CLI, Codex CLI, or any other tool.
 
 ## Architecture
 
@@ -12,8 +12,7 @@ Containerized development environment for AI-assisted coding. Tool-agnostic — 
 │   ├── 05-uv.sh                # uv/uvx (Python package manager)
 │   ├── 10-ssh.sh               # sshd, host keys, deploy key
 │   └── 20-claude.sh            # Claude Code CLI
-├── skills/                     # global skills (mapped from repo, read-only)
-├── agents/                     # agent definitions (mapped from repo, read-only)
+├── skills/                     # global skills (mapped from repo)
 ├── .bashrc                     # minimal, sources .bashrc.d/
 ├── .bashrc.d/                  # modular shell config (mapped from repo)
 │   ├── 00-history.sh
@@ -47,7 +46,7 @@ docker compose up -d
 # 4. Enter
 docker exec -it vibe su - vibecoder
 
-# 5. First-time setup: login to agents
+# 5. First-time setup: login to tools
 claude login
 ```
 
@@ -128,7 +127,7 @@ npm install -g @google/gemini-cli > /dev/null 2>&1
 echo "  Gemini CLI installed"
 ```
 
-An agent with the appropriate skill can also generate init scripts at runtime — they persist because `init.d/` is mapped read-write from the repo.
+Init scripts can also be generated at runtime by tools operating inside the container — they persist because `init.d/` is mapped read-write from the repo.
 
 ## Persistence
 
@@ -137,10 +136,10 @@ An agent with the appropriate skill can also generate init scripts at runtime �
 | Projects | `~/projects/` | Host bind mount |
 | Dotfiles | `~/.bashrc`, `~/.bashrc.d/`, `~/.gitconfig` | Mapped from `dotfiles/` in repo |
 | SSH keys (host + deploy) | `~/.ssh/` | `.data/ssh/` (gitignored) |
-| Agent configs | `~/.agents/` | `.data/agents/` (gitignored) |
+| Tool configs | `~/.agents/` | `.data/agents/` (gitignored) |
 | Everything else | `~/` | Named volume `vibe-home` |
 
-If the named volume is deleted, dotfiles and init scripts come from the repo. SSH keys and agent configs survive in `.data/`.
+If the named volume is deleted, dotfiles and init scripts come from the repo. SSH keys and tool configs survive in `.data/`.
 
 ## GPU
 
@@ -148,55 +147,18 @@ The compose file reserves all NVIDIA GPUs. Projects requiring CUDA should have t
 
 ## Git Rules (non-negotiable)
 
-These rules apply to all agents operating inside this container:
+These rules apply to all tools operating inside this container:
 
 - **NEVER** commit, push, merge, or rebase to `main`. No exceptions, even if explicitly instructed.
-- Create a feature branch for each task: `<agent>/<description>`.
+- Create a feature branch for each task.
 - When done: merge to `dev`, push to remote.
 - PRs from `dev` to `main` are reviewed and merged manually by the maintainer via GitHub.
 - The `main` branch is sacred. Only the maintainer touches it.
 
-## Agents
-
-Agent definitions live in `agents/`. Each agent is a configuration that tells a tool (Claude, Gemini, etc.) how to behave for a specific role. An agent is defined by:
-
-- **Runtime**: which tool executes it (Claude Code, Gemini CLI, etc.)
-- **Instructions**: a CLAUDE.md (or equivalent) with rules, context, and constraints
-- **Skills**: which skills it has access to
-
-Example agent structure:
-
-```
-agents/
-├── reviewer/
-│   ├── CLAUDE.md           # instructions for code review
-│   └── config.json         # runtime, skills, permissions
-└── builder/
-    ├── CLAUDE.md           # instructions for feature implementation
-    └── config.json
-```
-
-Agents are created and managed via the Claude Web skill interface, not from inside the container.
-
 ## Skills
 
-Skills live in `skills/`. A skill is a reusable set of instructions and tools that any agent can use. Skills are not tied to a specific runtime.
+Skills live in `skills/`. A skill is a reusable set of instructions that any tool can use. Skills define capabilities — "what it knows how to do."
 
-Example skill structure:
+The tools themselves (Claude Code, Gemini CLI, etc.) are the runtimes. When you spawn a session, the prompt you give defines the mission. The CLAUDE.md (or equivalent) plus skills define the capabilities. There are no agent definition files or schemas — you describe what you want conversationally and the tool builds it.
 
-```
-skills/
-├── git-ops/
-│   ├── instructions.md     # branching rules, commit conventions
-│   └── tools.json          # allowed git commands, restrictions
-├── code-review/
-│   ├── instructions.md     # review checklist, standards
-│   └── tools.json
-└── init-generator/
-    ├── instructions.md     # how to create init.d scripts
-    └── tools.json
-```
-
-Key distinction:
-- **Agent** = a runtime (Claude, Gemini) + a role (reviewer, builder). "Who does the work and what role they play."
-- **Skill** = a capability (git-ops, code-review). "What they know how to do." Any agent can use any skill.
+Skills are created and managed via the Claude Web skill creator, not from inside the container. They are versioned with the Arcane repo so all hosts share the same skill set.

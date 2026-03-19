@@ -16,13 +16,12 @@ services:
       - ${ARCANE}/vibe/init.d:/home/${VIBE_USER:-vibecoder}/init.d
 
       # Dotfiles — mapped directly into home, editable
-      - ${ARCANE}/vibe/dotfiles/.bashrc:/home/${VIBE_USER:-vibecoder}/.bashrc:ro
-      - ${ARCANE}/vibe/dotfiles/.bashrc.d:/home/${VIBE_USER:-vibecoder}/.bashrc.d:ro
+      - ${ARCANE}/vibe/dotfiles/.bashrc:/home/${VIBE_USER:-vibecoder}/.bashrc
+      - ${ARCANE}/vibe/dotfiles/.bashrc.d:/home/${VIBE_USER:-vibecoder}/.bashrc.d
       - ${ARCANE}/vibe/dotfiles/.gitconfig:/home/${VIBE_USER:-vibecoder}/.gitconfig
 
-      # Skills and agents definitions — versionado com arcane
-      - ${ARCANE}/vibe/skills:/home/${VIBE_USER:-vibecoder}/skills:ro
-      - ${ARCANE}/vibe/agents:/home/${VIBE_USER:-vibecoder}/agents:ro
+      # Skills — versionado com arcane
+      - ${ARCANE}/vibe/skills:/home/${VIBE_USER:-vibecoder}/skills
 
       # Projects — host bind mount
       - ${VIBE_CODE_PATH}:/home/${VIBE_USER:-vibecoder}/projects

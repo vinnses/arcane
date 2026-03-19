@@ -1,7 +1,8 @@
 services:
   code:
     image: node:20-bookworm
-    container_name: vibe
+    container_name: ${VIBE_CONTAINER:-vibe}
+    hostname: ${VIBE_HOSTNAME:-vibe}
     restart: unless-stopped
     env_file:
       - .env
@@ -13,16 +14,17 @@ services:
       # Init scripts — read-only
       - ${ARCANE}/vibe/init.d:/opt/vibe/init.d:ro
 
-      # SSH authorized keys — read-only (for Antigravity)
-      - ${ARCANE}/vibe/ssh:/opt/vibe/ssh:ro
+      # User configs (bashrc, gitconfig, authorized_keys) — read-only
+      - ${ARCANE}/vibe/data/user:/opt/vibe/user:ro
 
       # Workspace — host bind mount for projects
       - ${VIBE_CODE_PATH}:/codes
 
       # Persistent home — tool configs survive container recreations
-      - vibe-home:/home/vibe
+      - vibe-home:/home/${VIBE_USER:-vibecoder}
 
     environment:
+      - VIBE_USER=${VIBE_USER:-vibecoder}
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
 

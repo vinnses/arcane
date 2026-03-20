@@ -1,6 +1,7 @@
 services:
   vibecode:
     image: node:20-bookworm
+    user: "node"
     #container_name: vibing
     hostname: vibration
     restart: unless-stopped
@@ -8,38 +9,33 @@ services:
       - .env
     #entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
     entrypoint: ["sleep", "infinity"]
-    working_dir: /home/viber/projects
+    working_dir: /home/node/projects
     stdin_open: true
     tty: true
 
     volumes:
       # Init scripts — read-write (agents can generate new ones)
-      - ${ARCANE}/vibespace/init.d:/home/viber/init.d
+      - ${ARCANE}/vibespace/init.d:/home/node/init.d
 
       # Dotfiles — mapped directly into home, editable
-      - ${ARCANE}/vibespace/dotfiles/.bashrc:/home/viber/.bashrc
-      - ${ARCANE}/vibespace/dotfiles/.bashrc.d:/home/viber/.bashrc.d
-      - ${ARCANE}/vibespace/dotfiles/.gitconfig:/home/viber/.gitconfig
+      - ${ARCANE}/vibespace/dotfiles/.bashrc:/home/node/.bashrc
+      - ${ARCANE}/vibespace/dotfiles/.bashrc.d:/home/node/.bashrc.d
+      - ${ARCANE}/vibespace/dotfiles/.gitconfig:/home/node/.gitconfig
 
       # Skills — versionado com arcane
-      - ${ARCANE}/vibespace/skills:/home/viber/skills
+      - ${ARCANE}/vibespace/skills:/home/node/skills
 
       # Projects — host bind mount
-      - ${PROJECT_PATH}:/home/viber/projects
+      - ${PROJECT_PATH}:/home/node/projects
 
       # Agent configs (.claude/, etc.) — persists outside named volume
-      - ${ARCANE}/vibespace/.data/agents:/home/viber/.agents
+      - ${ARCANE}/vibespace/.data/agents:/home/node/.agents
 
       # SSH keys — persists outside named volume
-      - ${ARCANE}/vibespace/.data/ssh:/home/viber/.ssh
+      - ${ARCANE}/vibespace/.data/ssh:/home/node/.ssh
 
       # Persistent home (catch-all for everything else)
-      - vibestorage:/home/viber
-
-    environment:
-      - USER=viber
-      - PUID=${PUID:-1000}
-      - PGID=${PGID:-1000}
+      - vibestorage:/home/node
 
     ports:
       - "${SSH_PORT:-2222}:22"

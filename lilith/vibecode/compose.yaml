@@ -1,47 +1,47 @@
 services:
-  code:
+  vibecode:
     image: node:20-bookworm
-    container_name: ${VIBE_CONTAINER:-vibe}
-    hostname: ${VIBE_HOSTNAME:-vibe}
+    container_name: ${CONTAINER:-vibe}
+    hostname: ${HOSTNAME:-vibe}
     restart: unless-stopped
     env_file:
       - .env
     entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
-    working_dir: /home/${VIBE_USER:-vibecoder}/projects
+    working_dir: /home/${USER:-vibecoder}/projects
     stdin_open: true
     tty: true
 
     volumes:
       # Init scripts — read-write (agents can generate new ones)
-      - ${ARCANE}/vibe/init.d:/home/${VIBE_USER:-vibecoder}/init.d
+      - ${ARCANE}/vibecode/init.d:/home/${USER:-vibecoder}/init.d
 
       # Dotfiles — mapped directly into home, editable
-      - ${ARCANE}/vibe/dotfiles/.bashrc:/home/${VIBE_USER:-vibecoder}/.bashrc
-      - ${ARCANE}/vibe/dotfiles/.bashrc.d:/home/${VIBE_USER:-vibecoder}/.bashrc.d
-      - ${ARCANE}/vibe/dotfiles/.gitconfig:/home/${VIBE_USER:-vibecoder}/.gitconfig
+      - ${ARCANE}/vibecode/dotfiles/.bashrc:/home/${USER:-vibecoder}/.bashrc
+      - ${ARCANE}/vibecode/dotfiles/.bashrc.d:/home/${USER:-vibecoder}/.bashrc.d
+      - ${ARCANE}/vibecode/dotfiles/.gitconfig:/home/${USER:-vibecoder}/.gitconfig
 
       # Skills — versionado com arcane
-      - ${ARCANE}/vibe/skills:/home/${VIBE_USER:-vibecoder}/skills
+      - ${ARCANE}/vibecode/skills:/home/${USER:-vibecoder}/skills
 
       # Projects — host bind mount
-      - ${VIBE_CODE_PATH}:/home/${VIBE_USER:-vibecoder}/projects
+      - ${PROJECT_PATH}:/home/${USER:-vibecoder}/projects
 
       # Agent configs (.claude/, etc.) — persists outside named volume
-      - ${ARCANE}/vibe/.data/agents:/home/${VIBE_USER:-vibecoder}/.agents
+      - ${ARCANE}/vibecode/.data/agents:/home/${USER:-vibecoder}/.agents
 
       # SSH keys — persists outside named volume
-      - ${ARCANE}/vibe/.data/ssh:/home/${VIBE_USER:-vibecoder}/.ssh
+      - ${ARCANE}/vibecode/.data/ssh:/home/${USER:-vibecoder}/.ssh
 
       # Persistent home (catch-all for everything else)
-      - vibe-home:/home/${VIBE_USER:-vibecoder}
+      - vibehome:/home/${USER:-vibecoder}
 
     environment:
-      - VIBE_USER=${VIBE_USER:-vibecoder}
+      - USER=${USER:-vibecoder}
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
 
     ports:
-      - "${VIBE_SSH_PORT:-2222}:22"
+      - "${SSH_PORT:-2222}:22"
 
     deploy:
       resources:
@@ -55,7 +55,7 @@ services:
       - lilith_default
 
 volumes:
-  vibe-home:
+  vibehome:
 
 networks:
   lilith_default:

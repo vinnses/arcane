@@ -1,42 +1,43 @@
 services:
-  vibercode:
+  vibecode:
     image: node:20-bookworm
-    container_name: vibration
-    hostname: vibing
+    #container_name: vibing
+    hostname: vibration
     restart: unless-stopped
     env_file:
       - .env
-    entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
-    working_dir: /home/vibecoder/vibrated
+    #entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
+    entrypoint: ["sleep", "infinity"]
+    working_dir: /home/viber/projects
     stdin_open: true
     tty: true
 
     volumes:
       # Init scripts — read-write (agents can generate new ones)
-      - ${ARCANE}/vibecode/init.d:/home/vibecoder/init.d
+      - ${ARCANE}/vibespace/init.d:/home/viber/init.d
 
       # Dotfiles — mapped directly into home, editable
-      - ${ARCANE}/vibecode/dotfiles/.bashrc:/home/vibecoder/.bashrc
-      - ${ARCANE}/vibecode/dotfiles/.bashrc.d:/home/vibecoder/.bashrc.d
-      - ${ARCANE}/vibecode/dotfiles/.gitconfig:/home/vibecoder/.gitconfig
+      - ${ARCANE}/vibespace/dotfiles/.bashrc:/home/viber/.bashrc
+      - ${ARCANE}/vibespace/dotfiles/.bashrc.d:/home/viber/.bashrc.d
+      - ${ARCANE}/vibespace/dotfiles/.gitconfig:/home/viber/.gitconfig
 
       # Skills — versionado com arcane
-      - ${ARCANE}/vibecode/skills:/home/vibecoder/skills
+      - ${ARCANE}/vibespace/skills:/home/viber/skills
 
       # Projects — host bind mount
-      - ${PROJECT_PATH}:/home/vibecoder/vibrated
+      - ${PROJECT_PATH}:/home/viber/projects
 
       # Agent configs (.claude/, etc.) — persists outside named volume
-      - ${ARCANE}/vibecode/.data/agents:/home/vibecoder/.agents
+      - ${ARCANE}/vibespace/.data/agents:/home/viber/.agents
 
       # SSH keys — persists outside named volume
-      - ${ARCANE}/vibecode/.data/ssh:/home/vibecoder/.ssh
+      - ${ARCANE}/vibespace/.data/ssh:/home/viber/.ssh
 
       # Persistent home (catch-all for everything else)
-      - vibestorage:/home/vibecoder
+      - vibestorage:/home/viber
 
     environment:
-      - USER=vibecoder
+      - USER=viber
       - PUID=${PUID:-1000}
       - PGID=${PGID:-1000}
 

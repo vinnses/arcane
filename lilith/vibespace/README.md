@@ -7,10 +7,12 @@ Containerized development environment for AI-assisted coding. Tool-agnostic — 
 | Name | What | Why |
 |---|---|---|
 | `vibespace` | Host directory | The space where vibes are configured |
-| `vibing` | Docker image | The frozen state — ready to vibe |
+| `vibe:latest` | Docker image | The frozen state — ready to vibe |
+| `ts-vibecode` | Compose service | Tailscale sidecar — the tailnet node |
 | `vibecode` | Compose service | The act of vibe-coding |
 | `vibration` | Container name | The running vibration |
 | `viber` | Hostname | The vibrator — how it presents on the network |
+| `${DEVICE}-viber` | Tailscale hostname | How it presents on the tailnet |
 | `vibecoder` | User inside container | The one who vibe-codes |
 | `vibestorage` | Named volume | Where vibes persist |
 
@@ -47,7 +49,7 @@ Containerized development environment for AI-assisted coding. Tool-agnostic — 
 ```bash
 # 1. Configure
 cp .env.example .env
-# Edit .env: set PROJECT_PATH to your projects directory
+# Edit .env: set PROJECT_PATH, DEVICE, and TS_AUTHKEY
 
 # 2. Build
 docker compose build
@@ -74,41 +76,45 @@ claude login
 docker exec -it vibration su - vibecoder
 ```
 
-### SSH (VSCode Remote, Antigravity)
+### SSH via Tailscale
+
+The container is a Tailscale node (`${DEVICE}-viber`). No ports exposed on the host.
 
 ```bash
-ssh vibecoder@localhost -p 2222
+ssh vibecoder@lilith-viber
 ```
 
-### SSH via ProxyJump (remote hosts)
+### SSH config (recommended)
 
 ```
 # ~/.ssh/config
 Host vibe-lilith
-    HostName localhost
-    Port 2222
+    HostName lilith-viber
     User vibecoder
-    ProxyJump lilith
 
 Host vibe-asmodeus
-    HostName localhost
-    Port 2222
+    HostName asmodeus-viber
     User vibecoder
-    ProxyJump asmodeus
 ```
 
 Then: `ssh vibe-lilith` or `ssh vibe-asmodeus`.
+
+### Network isolation
+
+The viber node has **no outbound SSH access** — it has no SSH keys to connect to other devices. Other devices can SSH into it using their keys via `authorized_keys`. Password authentication is disabled.
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
+| `DEVICE` | `lilith` | Device name — Tailscale hostname becomes `${DEVICE}-viber` |
 | `VIBE_USER` | `vibecoder` | Container username (build arg + runtime) |
 | `PUID` | `1000` | User ID — match host for file permissions (build arg) |
 | `PGID` | `1000` | Group ID (build arg) |
 | `ARCANE` | — | Path to arcane/lilith directory |
 | `PROJECT_PATH` | — | Host directory for projects (mounted at ~/projects) |
-| `SSH_PORT` | `2222` | SSH port exposed on host |
+| `TS_AUTHKEY` | — | Tailscale auth key (tag:viber required in ACL) |
+| `TS_EXTRA_ARGS` | — | Tailscale extra args (`--advertise-tags=tag:viber`) |
 
 Changing `VIBE_USER`, `PUID`, or `PGID` requires a rebuild (`docker compose build`).
 
@@ -178,6 +184,7 @@ Init scripts can also be generated at runtime by tools operating inside the cont
 | Dotfiles | `~/.bashrc`, `~/.bashrc.d/`, `~/.gitconfig` | Mapped from `dotfiles/` in repo |
 | SSH keys (host + deploy) | `~/.ssh/` | `.data/ssh/` (gitignored) |
 | Tool configs | `~/.agents/` | `.data/agents/` (gitignored) |
+| Tailscale state | `/var/lib/tailscale` | `.data/tailscale/` (gitignored) |
 | Everything else | `~/` | Named volume `vibestorage` |
 
 If the named volume is deleted, dotfiles and init scripts come from the repo. SSH keys and tool configs survive in `.data/`.

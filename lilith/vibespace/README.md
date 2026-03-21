@@ -28,6 +28,7 @@ Containerized development environment for AI-assisted coding. Tool-agnostic — 
 ├── .bashrc                     # minimal, sources .bashrc.d/
 ├── .bashrc.d/                  # modular shell config (mapped from repo)
 │   ├── 00-history.sh
+│   ├── 01-path.sh              # ~/.local/bin, ~/.npm-global/bin
 │   ├── 10-options.sh
 │   ├── 20-prompt.sh
 │   └── 30-aliases.sh
@@ -113,7 +114,7 @@ Changing `VIBE_USER`, `PUID`, or `PGID` requires a rebuild (`docker compose buil
 
 ## Entrypoint
 
-The container runs `entrypoint.sh` on startup, which executes all `init.d/*.sh` scripts in order, then sleeps.
+The container runs `entrypoint.sh` as `vibecoder` (non-root) on startup. It executes all `init.d/*.sh` scripts in alphabetical order, then sleeps.
 
 To skip init (debug/quick start):
 
@@ -125,14 +126,27 @@ The entrypoint is volume-mapped from the repo, so changes take effect on next re
 
 ## Init Scripts
 
-Init scripts run in alphabetical order on every container start. They live in `init.d/` and are mapped read-write into the container.
+Init scripts run as `vibecoder` (non-root) in alphabetical order on every container start. They live in `init.d/` and are mapped read-write into the container.
+
+Numbering follows the nginx convention — **gaps of 10** between groups, leaving room for future scripts without renumbering:
 
 | Range | Group | Scripts |
 |---|---|---|
-| `0x` | Base tools | `05-uv.sh` — uv/uvx for Python |
-| `1x` | Infrastructure | `10-ssh.sh` — sshd, host keys, deploy key |
-| `2x` | Agent runtimes | `20-claude.sh` — Claude Code CLI |
-| `3x+` | Project-specific | _(add as needed)_ |
+| `00–09` | Base tools | `05-uv.sh` — uv/uvx (installs to `~/.local/bin`) |
+| `10–19` | Infrastructure | `10-ssh.sh` — sshd, host keys, deploy key |
+| `20–29` | Agent runtimes | `20-claude.sh` — Claude Code CLI (installs to `~/.npm-global/`) |
+| `30–99` | Project-specific | _(add as needed)_ |
+
+### Privilege model
+
+Scripts run as `vibecoder`. Use `sudo` only for operations that genuinely require root, and only for the specific command:
+
+| Needs `sudo` | Doesn't need `sudo` |
+|---|---|
+| Writing to `/etc/ssh/sshd_config.d/` | `npm install -g` (uses `NPM_CONFIG_PREFIX`) |
+| Starting `sshd` on port 22 (privileged) | `curl \| sh` installers (uv → `~/.local/bin`) |
+| | `ssh-keygen`, `chmod`, `mkdir` on own files |
+| | Anything in `$HOME` |
 
 ### Adding a new tool
 

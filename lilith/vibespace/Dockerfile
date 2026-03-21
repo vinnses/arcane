@@ -20,3 +20,9 @@ RUN groupadd -g "${PGID}" "${VIBE_USER}" 2>/dev/null || true \
 
 # ── SSH run dir ───────────────────────────────────────────────────────────────
 RUN mkdir -p /run/sshd
+
+# ── Switch to non-root user ──────────────────────────────────────────────────
+USER ${VIBE_USER}
+
+ENV NPM_CONFIG_PREFIX=/home/${VIBE_USER}/.npm-global
+ENV PATH="/home/${VIBE_USER}/.local/bin:/home/${VIBE_USER}/.npm-global/bin:${PATH}"

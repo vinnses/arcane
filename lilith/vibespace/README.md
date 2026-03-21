@@ -1,17 +1,29 @@
-# Vibe
+# Vibespace
 
 Containerized development environment for AI-assisted coding. Tool-agnostic — supports Claude Code, Gemini CLI, Codex CLI, or any other tool.
+
+## Naming
+
+| Name | What | Why |
+|---|---|---|
+| `vibespace` | Host directory | The space where vibes are configured |
+| `vibing` | Docker image | The frozen state — ready to vibe |
+| `vibecode` | Compose service | The act of vibe-coding |
+| `vibration` | Container name | The running vibration |
+| `viber` | Hostname | The vibrator — how it presents on the network |
+| `vibecoder` | User inside container | The one who vibe-codes |
+| `vibestorage` | Named volume | Where vibes persist |
 
 ## Architecture
 
 ```
-~/                              # /home/vibecoder (named volume: vibe-home)
-├── projects/                   # bind mount from host (VIBE_CODE_PATH)
+~/                              # /home/vibecoder (named volume: vibestorage)
+├── entrypoint.sh               # mapped from repo, runs init.d/*.sh
 ├── init.d/                     # init scripts (mapped from repo, read-write)
-│   ├── 00-init.sh              # user creation, base system deps
 │   ├── 05-uv.sh                # uv/uvx (Python package manager)
 │   ├── 10-ssh.sh               # sshd, host keys, deploy key
 │   └── 20-claude.sh            # Claude Code CLI
+├── projects/                   # bind mount from host (PROJECT_PATH)
 ├── skills/                     # global skills (mapped from repo)
 ├── .bashrc                     # minimal, sources .bashrc.d/
 ├── .bashrc.d/                  # modular shell config (mapped from repo)
@@ -34,19 +46,22 @@ Containerized development environment for AI-assisted coding. Tool-agnostic — 
 ```bash
 # 1. Configure
 cp .env.example .env
-# Edit .env: set VIBE_CODE_PATH to your projects directory
+# Edit .env: set PROJECT_PATH to your projects directory
 
-# 2. Create authorized_keys for SSH access
+# 2. Build
+docker compose build
+
+# 3. Create authorized_keys for SSH access
 mkdir -p .data/ssh
 cp ~/.ssh/id_ed25519.pub .data/ssh/authorized_keys
 
-# 3. Start
+# 4. Start
 docker compose up -d
 
-# 4. Enter
-docker exec -it vibe su - vibecoder
+# 5. Enter
+docker exec -it vibration su - vibecoder
 
-# 5. First-time setup: login to tools
+# 6. First-time setup: login to tools
 claude login
 ```
 
@@ -55,7 +70,7 @@ claude login
 ### Direct
 
 ```bash
-docker exec -it vibe su - vibecoder
+docker exec -it vibration su - vibecoder
 ```
 
 ### SSH (VSCode Remote, Antigravity)
@@ -87,25 +102,37 @@ Then: `ssh vibe-lilith` or `ssh vibe-asmodeus`.
 
 | Variable | Default | Description |
 |---|---|---|
-| `VIBE_USER` | `vibecoder` | Container username |
-| `VIBE_CONTAINER` | `vibe` | Container name |
-| `VIBE_HOSTNAME` | `vibe` | Container hostname |
-| `VIBE_CODE_PATH` | — | Host directory for projects (mounted at ~/projects) |
-| `VIBE_SSH_PORT` | `2222` | SSH port exposed on host |
-| `PUID` | `1000` | User ID (match host for file permissions) |
-| `PGID` | `1000` | Group ID |
+| `VIBE_USER` | `vibecoder` | Container username (build arg + runtime) |
+| `PUID` | `1000` | User ID — match host for file permissions (build arg) |
+| `PGID` | `1000` | Group ID (build arg) |
 | `ARCANE` | — | Path to arcane/lilith directory |
+| `PROJECT_PATH` | — | Host directory for projects (mounted at ~/projects) |
+| `SSH_PORT` | `2222` | SSH port exposed on host |
+
+Changing `VIBE_USER`, `PUID`, or `PGID` requires a rebuild (`docker compose build`).
+
+## Entrypoint
+
+The container runs `entrypoint.sh` on startup, which executes all `init.d/*.sh` scripts in order, then sleeps.
+
+To skip init (debug/quick start):
+
+```bash
+docker compose run --entrypoint "sleep infinity" vibecode
+```
+
+The entrypoint is volume-mapped from the repo, so changes take effect on next restart without rebuilding.
 
 ## Init Scripts
 
-Init scripts run in alphabetical order on every `docker compose up`. They live in `init.d/` and are mapped read-write into the container.
+Init scripts run in alphabetical order on every container start. They live in `init.d/` and are mapped read-write into the container.
 
-| Script | Purpose |
-|---|---|
-| `00-init.sh` | Creates user, installs base deps (git, curl, jq, tmux, vim, build-essential) |
-| `05-uv.sh` | Installs uv/uvx for Python project management |
-| `10-ssh.sh` | SSH server with container-own keys, deploy key for git |
-| `20-claude.sh` | Claude Code CLI |
+| Range | Group | Scripts |
+|---|---|---|
+| `0x` | Base tools | `05-uv.sh` — uv/uvx for Python |
+| `1x` | Infrastructure | `10-ssh.sh` — sshd, host keys, deploy key |
+| `2x` | Agent runtimes | `20-claude.sh` — Claude Code CLI |
+| `3x+` | Project-specific | _(add as needed)_ |
 
 ### Adding a new tool
 
@@ -137,13 +164,42 @@ Init scripts can also be generated at runtime by tools operating inside the cont
 | Dotfiles | `~/.bashrc`, `~/.bashrc.d/`, `~/.gitconfig` | Mapped from `dotfiles/` in repo |
 | SSH keys (host + deploy) | `~/.ssh/` | `.data/ssh/` (gitignored) |
 | Tool configs | `~/.agents/` | `.data/agents/` (gitignored) |
-| Everything else | `~/` | Named volume `vibe-home` |
+| Everything else | `~/` | Named volume `vibestorage` |
 
 If the named volume is deleted, dotfiles and init scripts come from the repo. SSH keys and tool configs survive in `.data/`.
 
 ## GPU
 
-The compose file reserves all NVIDIA GPUs. Projects requiring CUDA should have their toolkit installed via a dedicated init script (e.g., `50-cuda.sh`). The base container does not include CUDA.
+This image does **not** include CUDA, cuDNN, or any GPU runtime. There's a reason for that.
+
+NVIDIA/CUDA images exist because the GPU stack is massive (~5-15GB), tightly version-coupled (driver ↔ toolkit ↔ cuDNN ↔ framework), and changes independently from the application layer. Mixing `node:20-bookworm` with CUDA packages is fragile and produces bloated images.
+
+The intended architecture for GPU workloads is a **separate service** in this same compose file:
+
+```yaml
+services:
+  vibecode:
+    # ... (this service, the coding environment)
+
+  vibecore:
+    image: nvidia/cuda:12.x-devel-ubuntu22.04  # or pytorch/pytorch
+    container_name: vibration-gpu
+    hostname: vibecore
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - lilith_default
+    # ... volumes, SSH, etc.
+```
+
+The `vibecoder` user accesses `vibecore` via SSH — it's the only other host the agents can reach. Training, inference, and GPU-heavy tasks run there. The coding environment stays lean.
+
+This keeps concerns separated: **vibecode** is for thinking and writing code, **vibecore** is for running it on hardware.
 
 ## Git Rules (non-negotiable)
 

@@ -20,6 +20,3 @@ RUN groupadd -g "${PGID}" "${VIBE_USER}" 2>/dev/null || true \
 
 # ── SSH run dir ───────────────────────────────────────────────────────────────
 RUN mkdir -p /run/sshd
-
-USER ${VIBE_USER}
-WORKDIR /home/${VIBE_USER}

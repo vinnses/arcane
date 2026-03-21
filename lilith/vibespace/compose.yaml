@@ -1,23 +1,26 @@
 services:
   vibecode:
+    image: vibing
     build:
       context: .
       args:
         VIBE_USER: ${VIBE_USER:-vibecoder}
         PUID: ${PUID:-1000}
         PGID: ${PGID:-1000}
-    #container_name: vibing
-    hostname: vibration
+    container_name: vibration
+    hostname: viber
     restart: unless-stopped
     env_file:
       - .env
-    #entrypoint: ["bash", "-c", "set -e; for s in ~/init.d/*.sh; do bash \"$$s\"; done; echo '>>> [vibe] Ready.'; exec sleep infinity"]
-    entrypoint: ["sleep", "infinity"]
+    entrypoint: ["/entrypoint.sh"]
     working_dir: /home/${VIBE_USER:-vibecoder}/projects
     stdin_open: true
     tty: true
 
     volumes:
+      # Entrypoint — override with `--entrypoint "sleep infinity"` to skip init
+      - ${ARCANE}/vibespace/entrypoint.sh:/entrypoint.sh
+
       # Init scripts — read-write (agents can generate new ones)
       - ${ARCANE}/vibespace/init.d:/home/${VIBE_USER:-vibecoder}/init.d
 
@@ -43,14 +46,6 @@ services:
 
     ports:
       - "${SSH_PORT:-2222}:22"
-
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
 
     networks:
       - lilith_default

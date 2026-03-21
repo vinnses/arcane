@@ -1,6 +1,7 @@
 services:
   vibecode:
-    image: vibing
+    image: vibe:latest
+    pull_policy: build
     build:
       context: .
       args:

@@ -13,7 +13,9 @@ RUN apt-get update -qq && apt-get install -y -qq --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ── Create user matching host UID/GID ─────────────────────────────────────────
-RUN groupadd -g "${PGID}" "${VIBE_USER}" 2>/dev/null || true \
+# node:20-bookworm ships with user "node" (1000:1000) — remove it first
+RUN userdel -r node 2>/dev/null || true \
+    && groupadd -g "${PGID}" "${VIBE_USER}" 2>/dev/null || true \
     && useradd -m -u "${PUID}" -g "${PGID}" -s /bin/bash "${VIBE_USER}" \
     && echo "${VIBE_USER} ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/${VIBE_USER} \
     && chmod 0440 /etc/sudoers.d/${VIBE_USER}

@@ -2,9 +2,6 @@
 # SSH server — container-own keys, key-only auth
 set -e
 
-apt-get update -qq && apt-get install -y -qq --no-install-recommends \
-    openssh-server > /dev/null 2>&1 && rm -rf /var/lib/apt/lists/*
-
 USER_NAME="${VIBE_USER:-vibecoder}"
 USER_HOME=$(eval echo "~$USER_NAME")
 SSH_DIR="$USER_HOME/.ssh"

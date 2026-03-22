@@ -103,6 +103,23 @@ Then: `ssh vibe-lilith` or `ssh vibe-asmodeus`.
 
 The viber node has **no outbound SSH access** — it has no SSH keys to connect to other devices. Other devices can SSH into it using their keys via `authorized_keys`. Password authentication is disabled.
 
+Tailscale ACL must enforce this. Add to your [ACL policy](https://login.tailscale.com/admin/acls):
+
+```jsonc
+{
+  "tagOwners": {
+    "tag:viber": ["autogroup:admin"]
+  },
+  "acls": [
+    // viber nodes: accept connections, no outbound access
+    { "action": "accept", "src": ["autogroup:member"], "dst": ["tag:viber:*"] },
+    // ... other rules
+  ]
+}
+```
+
+No rule grants `tag:viber` as `src` — so viber nodes can't initiate connections to anything on the tailnet.
+
 ## Environment Variables
 
 | Variable | Default | Description |
